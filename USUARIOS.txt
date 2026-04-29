@@ -1,0 +1,65 @@
+# ============================================================
+#  GESTIÓN DE USUARIOS — nike.hyleveling.net
+# ============================================================
+
+## USUARIOS POR DEFECTO
+# ─────────────────────────────────────────────────────────────
+# ROL SALA (pueden buscar productos y enviar pedidos):
+#   camila     / nike1234
+#   diego      / nike1234
+#   valentina  / nike1234
+#   sebastian  / nike1234
+#   fernanda   / nike1234
+#   matias     / nike1234
+#
+# ROL BODEGA (pueden todo — subir Excel, gestionar pedidos, ver historial):
+#   bodega     / bodega2024
+#   admin      / admin2024
+# ─────────────────────────────────────────────────────────────
+
+
+## CÓMO CAMBIAR CONTRASEÑAS O AGREGAR USUARIOS
+# El archivo de usuarios está en: /var/www/nike-app/data/users.json
+# Las contraseñas se guardan como hash SHA-256, NO en texto plano.
+
+# Para generar el hash de una contraseña nueva, corre esto en el VPS:
+node -e "const c=require('crypto');console.log(c.createHash('sha256').update('TU_NUEVA_CONTRASEÑA').digest('hex'))"
+
+# Luego edita el archivo:
+nano /var/www/nike-app/data/users.json
+
+# Formato del archivo:
+# [
+#   { "username": "camila", "password": "HASH_AQUI", "role": "sala" },
+#   { "username": "bodega", "password": "HASH_AQUI", "role": "bodega" }
+# ]
+
+# Roles disponibles:
+#   "sala"   — solo puede buscar y enviar pedidos
+#   "bodega" — acceso completo (stock, pedidos, historial)
+
+# Después de editar users.json NO necesitas reiniciar el servidor.
+# Los cambios se aplican en el próximo login.
+
+
+## CÓMO ELIMINAR UN EX EMPLEADO
+# 1. Edita /var/www/nike-app/data/users.json
+# 2. Borra la línea de ese usuario
+# 3. Guarda el archivo
+# Listo — ese usuario no podrá volver a entrar.
+# Las sesiones activas expiran automáticamente en 12 horas.
+# Para forzar cierre inmediato, reinicia el servidor:
+pm2 restart nike-reposicion
+
+
+## CÓMO VER SESIONES ACTIVAS
+# Las sesiones están en memoria del servidor.
+# Para ver los logs de acceso:
+pm2 logs nike-reposicion --lines 50
+
+
+## FLUJO DE ACCESO
+# Todos entran por: https://nike.hyleveling.net/login.html
+# - Rol SALA   → redirige a /index.html   (Sala)
+# - Rol BODEGA → redirige a /bodega.html  (Bodega)
+# La sesión dura 12 horas, luego pide login nuevamente.

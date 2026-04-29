@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Nike · Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--red:#E11D2C;--orange:#FF6B00;--green:#22C55E;--blue:#3B82F6;--card:#111;--border:#222;--muted:#888;--bg:#0a0a0a}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:#fff;min-height:100vh;font-size:14px}
+/* Topbar */
+.topbar{background:#000;border-bottom:3px solid var(--red);height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;position:sticky;top:0;z-index:100}
+.tb-left{display:flex;align-items:center;gap:10px;min-width:0}
+.tb-logo{height:18px;filter:brightness(0) invert(1);flex-shrink:0}
+.tb-title{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+.tb-badge{background:var(--red);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;padding:2px 7px;border-radius:2px;text-transform:uppercase;flex-shrink:0}
+.tb-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.tb-btn{background:transparent;border:1px solid #444;color:#aaa;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;border-radius:2px;cursor:pointer;white-space:nowrap;touch-action:manipulation}
+.tb-btn:hover{border-color:#777;color:#fff}
+/* Main */
+.main{max-width:900px;margin:0 auto;padding:20px 12px}
+.section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.section-title{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+.card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:16px;margin-bottom:16px}
+/* Role tags */
+.rtag{display:inline-block;padding:2px 7px;border-radius:2px;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-right:2px}
+.rt-sala{background:#0d2a12;color:#22C55E}
+.rt-bodega{background:#0a1a2a;color:#3B82F6}
+.rt-jefe{background:#2a1a0a;color:#FF6B00}
+.rt-admin{background:#2a0a0a;color:#E11D2C}
+/* Buttons */
+.btn{border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;border-radius:2px;transition:all .15s;touch-action:manipulation;-webkit-appearance:none}
+.btn-primary{background:#fff;color:#000}
+.btn-danger{background:#1a0808;color:#f87171;border:1px solid #3a1515}
+.btn-ghost{background:transparent;color:#aaa;border:1px solid #444}
+.btn-ghost:hover{border-color:#777;color:#fff}
+.btn-orange{background:var(--orange);color:#fff}
+/* Table — scrollable on mobile */
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.user-table{width:100%;border-collapse:collapse;min-width:520px}
+.user-table th{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:8px 10px;text-align:left;border-bottom:1px solid #1a1a1a;white-space:nowrap}
+.user-table td{padding:10px 10px;border-bottom:1px solid #1a1a1a;vertical-align:middle}
+.user-table tr:last-child td{border-bottom:none}
+/* Modal */
+#modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9000;align-items:flex-end;justify-content:center}
+#modal.show{display:flex}
+@media(min-width:600px){#modal{align-items:center}}
+.modal-card{background:#111;border:1px solid #222;width:100%;max-width:480px;border-radius:16px 16px 0 0;padding:24px 20px 36px;max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+@media(min-width:600px){.modal-card{border-radius:12px;padding:28px 24px}}
+.modal-title{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:900;text-transform:uppercase;color:#fff;margin-bottom:18px}
+/* Fields */
+.field{margin-bottom:14px}
+.field label{display:block;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:6px}
+.field input{width:100%;padding:12px 14px;border:1px solid #444;border-radius:8px;background:#1a1a1a;font-size:16px;color:#fff;-webkit-appearance:none;font-family:'Barlow',sans-serif}
+.field input:focus{outline:none;border-color:#777}
+/* Role grid — 2x2 on mobile, 4x1 on desktop */
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
+.role-pick{display:flex;align-items:center;gap:10px;background:#1a1a1a;border:2px solid #2a2a2a;border-radius:8px;padding:12px 14px;cursor:pointer;transition:all .15s;touch-action:manipulation;-webkit-appearance:none;width:100%;text-align:left}
+.role-pick.active-sala{border-color:#22C55E;background:#0d2a12}
+.role-pick.active-bodega{border-color:#3B82F6;background:#0a1a2a}
+.role-pick.active-jefe{border-color:#FF6B00;background:#2a1a0a}
+.role-pick.active-admin{border-color:#E11D2C;background:#2a0a0a}
+.role-pick-icon{font-size:20px;flex-shrink:0}
+.role-pick-label{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#aaa;transition:color .15s}
+.role-pick.active-sala .role-pick-label{color:#22C55E}
+.role-pick.active-bodega .role-pick-label{color:#3B82F6}
+.role-pick.active-jefe .role-pick-label{color:#FF6B00}
+.role-pick.active-admin .role-pick-label{color:#E11D2C}
+.role-pick-check{margin-left:auto;font-size:16px;display:none}
+.role-pick.active-sala .role-pick-check,
+.role-pick.active-bodega .role-pick-check,
+.role-pick.active-jefe .role-pick-check,
+.role-pick.active-admin .role-pick-check{display:block;color:#fff}
+.err-msg{color:#f87171;font-size:12px;background:#1a0808;border:1px solid #3a1515;border-radius:6px;padding:8px 12px;display:none;margin-bottom:12px}
+.modal-actions{display:flex;gap:8px;margin-top:18px}
+.modal-actions .btn{flex:1;padding:14px;font-size:14px}
+/* Toast */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:#fff;color:#000;padding:10px 20px;border-radius:2px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;z-index:9999;opacity:0;transition:all .3s;border-left:3px solid var(--red);white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.pwd-badge{background:#1a1a0a;color:#F59E0B;border:1px solid #3a2a0a;border-radius:3px;padding:2px 7px;font-size:11px;font-family:'Barlow Condensed',sans-serif;font-weight:700}
+/* Actions column on mobile */
+.actions-cell{display:flex;gap:5px;flex-wrap:wrap}
+</style>
+
+<link rel="stylesheet" href="/nike-design.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tb-left">
+    <img src="/img/nike-logo.png" class="tb-logo" alt="">
+    <div class="tb-title">Admin</div>
+    <span class="tb-badge">Admin</span>
+  </div>
+  <div class="tb-right">
+    <button onclick="window.location.href='/index.html'" class="tb-btn">🛍 Sala</button>
+    <button onclick="window.location.href='/bodega.html'" class="tb-btn">📦 Bodega</button>
+    <button onclick="logout()" class="tb-btn">Salir</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="section-hd">
+    <div class="section-title">👥 Usuarios</div>
+    <button class="btn btn-primary" onclick="openNew()">+ Nuevo usuario</button>
+  </div>
+  <div class="card">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Gestiona accesos, roles y contraseñas del sistema</div>
+    <div class="table-wrap">
+      <table class="user-table">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Usuario</th>
+            <th>Roles</th>
+            <th>Contraseña</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="userBody">
+          <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="modal" onclick="handleModalBg(event)">
+  <div class="modal-card">
+    <div class="modal-title" id="modalTitle">Nuevo usuario</div>
+    <input type="hidden" id="editUser">
+    
+    <div class="field">
+      <label>Nombre completo</label>
+      <input type="text" id="fName" placeholder="Ej: Jessica Urrutia" autocomplete="off">
+    </div>
+    <div class="field" id="fUserWrap">
+      <label>Usuario (login)</label>
+      <input type="text" id="fUser" placeholder="Ej: jessica.urrutia" autocapitalize="none" autocomplete="off">
+    </div>
+
+    <div class="field">
+      <label>Roles — toca para activar</label>
+      <div class="role-grid">
+        <button type="button" class="role-pick" id="rp-sala" onclick="toggleRolePick('sala')">
+          <span class="role-pick-icon">🛍</span>
+          <span class="role-pick-label">Sala</span>
+          <span class="role-pick-check">✓</span>
+        </button>
+        <button type="button" class="role-pick" id="rp-bodega" onclick="toggleRolePick('bodega')">
+          <span class="role-pick-icon">📦</span>
+          <span class="role-pick-label">Bodega</span>
+          <span class="role-pick-check">✓</span>
+        </button>
+        <button type="button" class="role-pick" id="rp-jefe" onclick="toggleRolePick('jefe')">
+          <span class="role-pick-icon">⭐</span>
+          <span class="role-pick-label">Jefe</span>
+          <span class="role-pick-check">✓</span>
+        </button>
+        <button type="button" class="role-pick" id="rp-admin" onclick="toggleRolePick('admin')">
+          <span class="role-pick-icon">⚙</span>
+          <span class="role-pick-label">Admin</span>
+          <span class="role-pick-check">✓</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="field" id="fPwdWrap">
+      <label>Contraseña</label>
+      <input type="password" id="fPwd" placeholder="Vacío = nike2020 por defecto" autocomplete="new-password">
+    </div>
+
+    <div class="err-msg" id="modalErr"></div>
+
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="saveUser()">Guardar</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/auth.js"></script>
+<script>
+// Guard
+fetch('/api/me',{headers:{'x-auth-token':getToken()}}).then(r=>r.json()).then(d=>{
+  if(!d.ok||!d.roles?.includes('admin')) window.location.href='/login.html';
+}).catch(()=>window.location.href='/login.html');
+
+let _users=[];
+
+// ── Load & Render users ───────────────────────────────────────
+async function loadUsers() {
+  const res = await authFetch('/api/admin/users');
+  _users = await res.json();
+  renderUsers();
+}
+
+function renderUsers() {
+  const b = document.getElementById('userBody');
+  if (!_users.length) { b.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">Sin usuarios</td></tr>'; return; }
+  b.innerHTML = _users.map(u => {
+    const tags = (u.roles||[]).map(r=>`<span class="rtag rt-${r}">${r}</span>`).join('');
+    const pwd  = u.mustChangePassword
+      ? '<span class="pwd-badge">Debe cambiar</span>'
+      : '<span style="color:var(--muted);font-size:12px">OK</span>';
+    return `<tr>
+      <td style="font-weight:600;white-space:nowrap">${u.displayName}</td>
+      <td style="font-family:'Barlow Condensed',sans-serif;color:var(--muted);font-size:12px">${u.username}</td>
+      <td>${tags}</td>
+      <td>${pwd}</td>
+      <td><div class="actions-cell">
+        <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px" onclick="openEdit('${u.username}')">✏ Editar</button>
+        <button class="btn btn-orange" style="padding:4px 10px;font-size:11px" onclick="resetPwd('${u.username}','${u.displayName}')">🔑</button>
+        ${u.username!=='matias.saravia'?`<button class="btn btn-danger" style="padding:4px 10px;font-size:11px" onclick="delUser('${u.username}','${u.displayName}')">🗑</button>`:''}
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Role toggles ──────────────────────────────────────────────
+function toggleRolePick(role) {
+  const btn = document.getElementById('rp-' + role);
+  const isActive = btn.classList.contains('active-' + role);
+  if (isActive) {
+    btn.classList.remove('active-' + role);
+  } else {
+    btn.classList.add('active-' + role);
+  }
+}
+
+function setRoles(roles) {
+  ['sala','bodega','jefe','admin'].forEach(r => {
+    const btn = document.getElementById('rp-' + r);
+    btn.classList.remove('active-' + r);
+    if (roles.includes(r)) btn.classList.add('active-' + r);
+  });
+}
+
+function getRoles() {
+  return ['sala','bodega','jefe','admin'].filter(r =>
+    document.getElementById('rp-' + r).classList.contains('active-' + r)
+  );
+}
+
+// ── Modal ─────────────────────────────────────────────────────
+function openNew() {
+  document.getElementById('modalTitle').textContent = 'Nuevo usuario';
+  document.getElementById('editUser').value = '';
+  document.getElementById('fName').value = '';
+  document.getElementById('fUser').value = '';
+  document.getElementById('fPwd').value = '';
+  document.getElementById('fUserWrap').style.display = 'block';
+  document.getElementById('fPwdWrap').style.display = 'block';
+  document.getElementById('modalErr').style.display = 'none';
+  setRoles(['sala']);
+  document.getElementById('modal').classList.add('show');
+}
+
+function openEdit(username) {
+  const u = _users.find(x => x.username === username);
+  if (!u) return;
+  document.getElementById('modalTitle').textContent = 'Editar: ' + u.displayName;
+  document.getElementById('editUser').value = u.username;
+  document.getElementById('fName').value = u.displayName;
+  document.getElementById('fUser').value = u.username;
+  document.getElementById('fUserWrap').style.display = 'none';
+  document.getElementById('fPwdWrap').style.display = 'none';
+  document.getElementById('modalErr').style.display = 'none';
+  setRoles(u.roles || []);
+  document.getElementById('modal').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
+}
+
+function handleModalBg(e) {
+  if (e.target === document.getElementById('modal')) closeModal();
+}
+
+async function saveUser() {
+  const editUser   = document.getElementById('editUser').value;
+  const displayName = document.getElementById('fName').value.trim();
+  const username   = document.getElementById('fUser').value.trim().toLowerCase();
+  const password   = document.getElementById('fPwd').value;
+  const roles      = getRoles();
+  const errEl      = document.getElementById('modalErr');
+  errEl.style.display = 'none';
+
+  if (!displayName) { errEl.textContent='El nombre es obligatorio'; errEl.style.display='block'; return; }
+  if (!editUser && !username) { errEl.textContent='El usuario es obligatorio'; errEl.style.display='block'; return; }
+  if (!roles.length) { errEl.textContent='Selecciona al menos un rol'; errEl.style.display='block'; return; }
+
+  const isEdit = !!editUser;
+  const url    = isEdit ? `/api/admin/users/${editUser}` : '/api/admin/users';
+  const method = isEdit ? 'PUT' : 'POST';
+  const body   = isEdit
+    ? { displayName, roles }
+    : { username, displayName, password: password||'nike2020', roles };
+
+  try {
+    const res  = await authFetch(url, {method, headers:{'Content-Type':'application/json','x-auth-token':getToken()}, body:JSON.stringify(body)});
+    const data = await res.json();
+    if (!data.ok) { errEl.textContent=data.error||'Error'; errEl.style.display='block'; return; }
+    closeModal();
+    showToast(isEdit?'✓ Usuario actualizado':'✓ Usuario creado');
+    loadUsers();
+  } catch(e) { errEl.textContent='Error de conexión'; errEl.style.display='block'; }
+}
+
+async function resetPwd(username, name) {
+  if (!confirm(`Resetear contraseña de ${name} a "nike2020"?`)) return;
+  const res  = await authFetch(`/api/admin/users/${username}`,{method:'PUT',headers:{'Content-Type':'application/json','x-auth-token':getToken()},body:JSON.stringify({resetPassword:true})});
+  const data = await res.json();
+  if (data.ok) { showToast('✓ Contraseña reseteada'); loadUsers(); }
+}
+
+async function delUser(username, name) {
+  if (!confirm(`¿Eliminar a "${name}"?\nEsta acción no se puede deshacer.`)) return;
+  const res  = await authFetch(`/api/admin/users/${username}`,{method:'DELETE',headers:{'x-auth-token':getToken()}});
+  const data = await res.json();
+  if (data.ok) { showToast('✓ Usuario eliminado'); loadUsers(); }
+  else showToast('Error: ' + (data.error||''));
+}
+
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+loadUsers();
+</script>
+</body>
+</html>

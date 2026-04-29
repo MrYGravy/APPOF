@@ -1,0 +1,91 @@
+[
+  {
+    "username": "bodega",
+    "displayName": "Bodega",
+    "password": "eac365a6058692be232a0893bb997bf782eac899b312b9f49f6fff8de7c32105",
+    "roles": [
+      "sala",
+      "bodega"
+    ],
+    "mustChangePassword": false
+  },
+  {
+    "username": "damaris.alarcon",
+    "displayName": "Damaris Alarcón",
+    "password": "304d98da4a59129fe57da4ac05708b3e67b8e696d05601fc509aaa70d2876179",
+    "roles": [
+      "sala",
+      "bodega",
+      "jefe",
+      "admin"
+    ],
+    "mustChangePassword": false
+  },
+  {
+    "username": "maresa.inzunza",
+    "displayName": "Maresa Inzunza",
+    "password": "0a39b8de7624cd758775dec1a0718eadb81573f494fda571e609d8015dbabdf0",
+    "roles": [
+      "sala",
+      "bodega",
+      "jefe",
+      "admin"
+    ],
+    "mustChangePassword": false
+  },
+  {
+    "username": "pablo.abba",
+    "displayName": "Pablo Abba",
+    "password": "3fb0c2459c4fafbdb076043d98f81b09ad8b53b79e3715f38fc6c9555bde3475",
+    "roles": [
+      "sala",
+      "bodega",
+      "jefe"
+    ],
+    "mustChangePassword": false
+  },
+  {
+    "username": "pancha.mella",
+    "displayName": "Pancha Mella",
+    "password": "2396eef17a54adeb2339751d58810d985b1e985dc33bfc20a932825f79c351ad",
+    "roles": [
+      "sala",
+      "bodega",
+      "jefe",
+      "admin"
+    ],
+    "mustChangePassword": false
+  },
+  {
+    "username": "antonio.herrera",
+    "displayName": "Antonio Herrera",
+    "password": "d89674267b6315eca5d05cda8f2da57fb555dcc7db510f911f78defb9be5fd4a",
+    "roles": [
+      "sala",
+      "bodega",
+      "jefe"
+    ],
+    "mustChangePassword": true
+  },
+  {
+    "username": "matias.saravia",
+    "displayName": "Matias Saravia",
+    "password": "f459c9fdeab8a723de304ffa844099b1c3c569126173e98cefa7e94e572a1ddc",
+    "roles": [
+      "sala",
+      "bodega",
+      "jefe",
+      "admin"
+    ],
+    "mustChangePassword": false
+  },
+  {
+    "username": "sala",
+    "displayName": "Nike Sala",
+    "password": "eac365a6058692be232a0893bb997bf782eac899b312b9f49f6fff8de7c32105",
+    "roles": [
+      "sala"
+    ],
+    "mustChangePassword": false
+  }
+]

@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Nike · Exhibiciones</title>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/auth.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--red:#E11D2C;--green:#16A34A;--amber:#D97706;--blue:#2563EB;--bg:#181818;--card:#222;--border:#333;--text:#f0f0f0;--muted:#606060}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;min-height:100dvh}
+.topbar{background:#0e0e0e;padding:0 16px;height:56px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--red);position:sticky;top:0;z-index:100;box-shadow:0 1px 0 var(--red),0 4px 16px rgba(0,0,0,.6)}
+.tb-left{display:flex;align-items:center;gap:10px}
+.tb-logo{height:24px;width:auto;filter:brightness(0) invert(1)}
+.tb-div{width:1px;height:18px;background:#2a2a2a}
+.tb-title{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#fff}
+.back-btn{display:flex;align-items:center;gap:6px;background:transparent;border:1px solid #333;color:#a0a0a0;padding:7px 14px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:6px;transition:all .15s;text-decoration:none}
+.back-btn:hover{border-color:#555;color:#fff}
+.content{padding:20px 16px;max-width:700px;margin:0 auto}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.page-title{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:#fff}
+.week-label{font-size:12px;color:var(--muted);margin-top:3px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn-add{background:var(--red);color:#fff;border:none;padding:10px 18px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:8px;display:flex;align-items:center;gap:7px;transition:all .15s}
+.btn-add:hover{background:#c41020;transform:translateY(-1px)}
+.btn-sec{background:#242424;border:1px solid #383838;color:#c0c0c0;padding:10px 16px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:8px;display:flex;align-items:center;gap:7px;transition:all .15s}
+.btn-sec:hover{border-color:#555;color:#fff}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.stat-n{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:900;line-height:1}
+.stat-l{font-size:11px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.filters{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.filter-btn{padding:7px 16px;background:transparent;border:1px solid #333;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#707070;cursor:pointer;transition:all .12s}
+.filter-btn:hover{border-color:#555;color:#d0d0d0}
+.filter-btn.active{background:#fff;border-color:#fff;color:#000}
+.section-sep{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#404040;padding:8px 0;margin:6px 0;border-top:1px solid #222;border-bottom:1px solid #222}
+.exhib-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;border-left:3px solid var(--border);transition:box-shadow .2s}
+.exhib-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.3)}
+.exhib-card.incompleta{border-left-color:var(--amber)}
+.exhib-card.completa{border-left-color:var(--green)}
+.exhib-card.sin-caja{border-left-color:var(--red)}
+.exhib-sc{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;color:#fff;letter-spacing:.04em}
+.exhib-talla{font-size:12px;color:var(--muted);margin-top:2px}
+.badge{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;padding:2px 9px;border-radius:4px;letter-spacing:.04em}
+.badge-ok{background:#0a1e0a;color:#4ade80}
+.badge-warn{background:#2a1000;color:#FCD34D}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px}
+.info-box{background:#141414;border-radius:6px;padding:8px 10px}
+.info-box.full{grid-column:1/-1}
+.info-label{font-size:10px;color:#505050;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.info-val{font-size:13px;font-weight:700;font-family:'Barlow Condensed',sans-serif}
+.info-bodega-badge{background:#0a1530;border:1px solid #1e3a6e;border-radius:6px;padding:7px 10px;grid-column:1/-1;display:flex;align-items:center;gap:6px}
+.card-actions{display:flex;align-items:center;gap:6px}
+.btn-edit{background:none;border:1px solid #333;color:#707070;cursor:pointer;padding:3px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.04em;transition:all .12s}
+.btn-edit:hover{border-color:#555;color:#fff}
+.btn-del{background:none;border:none;color:#404040;cursor:pointer;font-size:16px;padding:2px 4px;transition:color .12s;line-height:1}
+.btn-del:hover{color:var(--red)}
+.empty{text-align:center;padding:48px 24px;color:#404040}
+.empty-title{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-top:12px}
+.empty-sub{font-size:13px;margin-top:6px;line-height:1.5}
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;z-index:9990;background:rgba(0,0,0,.85);align-items:flex-end;justify-content:center;padding:0;backdrop-filter:blur(4px)}
+.modal-sheet{background:#1a1a1a;border:1px solid #2e2e2e;border-radius:16px 16px 0 0;padding:24px 20px 40px;width:100%;max-width:560px;max-height:92vh;overflow-y:auto}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.modal-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;text-transform:uppercase;color:#fff;letter-spacing:.06em}
+.modal-close{background:none;border:none;color:#505050;cursor:pointer;font-size:24px;line-height:1;padding:2px 6px;transition:color .12s}
+.modal-close:hover{color:#fff}
+.form-grid{display:grid;gap:16px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-label{display:block;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#505050;margin-bottom:7px}
+.form-input{width:100%;background:#242424;border:1.5px solid #383838;border-radius:8px;padding:12px 14px;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:#fff;letter-spacing:.04em;outline:none;box-sizing:border-box;transition:border-color .15s}
+.form-input:focus{border-color:var(--red)}
+.form-input.text{font-family:'Barlow',sans-serif;font-size:14px;font-weight:400}
+.opt-group{display:grid;gap:6px}
+.opt-group.cols2{grid-template-columns:1fr 1fr}
+.opt-group.cols3{grid-template-columns:repeat(3,1fr)}
+.opt-btn{padding:12px 8px;background:#242424;border:1.5px solid #333;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#808080;cursor:pointer;transition:all .12s;text-align:center;width:100%}
+.opt-btn:hover{border-color:#555;color:#d0d0d0;background:#2a2a2a}
+.opt-btn.selected{background:#1a0808;border-color:var(--red);color:#fff}
+.btn-save{width:100%;margin-top:20px;padding:15px;background:var(--red);color:#fff;border:none;border-radius:10px;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .15s}
+.btn-save:hover{background:#c41020;transform:translateY(-1px)}
+.btn-save:active{transform:scale(.97)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#fff;color:#111;padding:10px 20px;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.04em;z-index:9999;opacity:0;transition:opacity .25s;border-left:4px solid var(--green);white-space:nowrap;max-width:calc(100vw - 32px)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tb-left">
+    <img src="/img/nike-logo.png" class="tb-logo" alt="Nike" onerror="this.style.display='none'">
+    <div class="tb-div"></div>
+    <div class="tb-title">Exhibiciones</div>
+  </div>
+  <a href="/index.html" class="back-btn">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8 1L3 6L8 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    Volver
+  </a>
+</div>
+
+<div class="content">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Revisión semanal</div>
+      <div class="week-label" id="weekLabel"></div>
+    </div>
+    <div class="actions">
+      <button class="btn-sec" onclick="imprimirExhib()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Imprimir
+      </button>
+      <button class="btn-sec" onclick="nuevaRevision()" style="border-color:#D97706;color:#D97706" onmouseover="this.style.borderColor='#f59e0b';this.style.color='#f59e0b'" onmouseout="this.style.borderColor='#D97706';this.style.color='#D97706'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+        Nueva revisión
+      </button>
+      <button class="btn-sec" id="btnReset" onclick="resetSemanal()" style="display:none;border-color:#7C2D12;color:#f87171">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+        Nueva semana
+      </button>
+      <button class="btn-add" onclick="abrirModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Agregar
+      </button>
+    </div>
+  </div>
+
+  <div class="stats" id="statsRow"></div>
+
+  <div class="filters">
+    <button class="filter-btn active" onclick="setFiltro('todas',this)">Todas</button>
+    <button class="filter-btn" onclick="setFiltro('incompletas',this)">Con problema</button>
+    <button class="filter-btn" onclick="setFiltro('completas',this)">Completas</button>
+    <button class="filter-btn" onclick="setFiltro('bodega',this)">Revisar al final</button>
+  </div>
+
+  <div id="exhibList"></div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-sheet">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Nueva Exhibición</div>
+      <button class="modal-close" onclick="cerrarModal()">×</button>
+    </div>
+    <input type="hidden" id="editId">
+    <div class="form-grid">
+      <div class="form-row">
+        <div>
+          <label class="form-label">Style Color</label>
+          <input id="fSC" type="text" placeholder="DD6203-001" class="form-input" oninput="this.value=this.value.toUpperCase()">
+        </div>
+        <div>
+          <label class="form-label">Talla exhibida</label>
+          <input id="fTalla" type="text" placeholder="9" class="form-input">
+        </div>
+      </div>
+      <div>
+        <label class="form-label">Caja de exhibición</label>
+        <div class="opt-group cols3">
+          <button class="opt-btn" data-group="caja" data-val="sala" onclick="selOpt(this)">En Sala</button>
+          <button class="opt-btn" data-group="caja" data-val="bodega" onclick="selOpt(this)">En Bodega</button>
+          <button class="opt-btn" data-group="caja" data-val="no_hay" onclick="selOpt(this)">No hay</button>
+        </div>
+      </div>
+      <div>
+        <label class="form-label">Estado de los pies</label>
+        <div class="opt-group cols2">
+          <button class="opt-btn" data-group="pie" data-val="completo" onclick="selOpt(this)">Ambos completos</button>
+          <button class="opt-btn" data-group="pie" data-val="falta_izq" onclick="selOpt(this)">Falta pie izq.</button>
+          <button class="opt-btn" data-group="pie" data-val="falta_der" onclick="selOpt(this)">Falta pie der.</button>
+          <button class="opt-btn" data-group="pie" data-val="faltan_ambos" onclick="selOpt(this)">Faltan ambos</button>
+        </div>
+      </div>
+      <div>
+        <label class="form-label">Ubicación en exhibidor</label>
+        <div class="opt-group cols3">
+          <button class="opt-btn" data-group="ubi" data-val="frontal" onclick="selOpt(this)">Frontal</button>
+          <button class="opt-btn" data-group="ubi" data-val="ambos_lados" onclick="selOpt(this)">Ambos lados</button>
+          <button class="opt-btn" data-group="ubi" data-val="trasero" onclick="selOpt(this)">Trasero</button>
+        </div>
+      </div>
+      <div>
+        <label class="form-label">Notas (opcional)</label>
+        <input id="fNota" type="text" placeholder="Ej: zapato suelto, falta cordón..." class="form-input text">
+      </div>
+    </div>
+    <button class="btn-save" onclick="guardar()">Guardar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// Auth check
+document.addEventListener('DOMContentLoaded', () => {
+  if (!getToken()) { window.location.href = '/login.html'; return; }
+  init();
+});
+
+const socket = io({ auth: { token: getToken() } });
+socket.on('exhibicion_nueva',       () => loadData());
+socket.on('exhibicion_actualizada', () => loadData());
+
+const CAJA = { sala:'En sala', bodega:'En bodega', no_hay:'No hay' };
+const PIE  = { completo:'Ambos completos', falta_izq:'Falta pie izq.', falta_der:'Falta pie der.', faltan_ambos:'Faltan ambos' };
+const UBI  = { frontal:'Exhibidor frontal', ambos_lados:'Ambos lados', trasero:'Exhibidor trasero' };
+const CAJA_C = { sala:'#16A34A', bodega:'#2563EB', no_hay:'#E11D2C' };
+const PIE_C  = { completo:'#16A34A', falta_izq:'#D97706', falta_der:'#D97706', faltan_ambos:'#E11D2C' };
+
+let data = [];
+let filtro = 'todas';
+
+function init() {
+  const sem = getWeekKey();
+  document.getElementById('weekLabel').textContent = 'Semana ' + sem;
+  // Show reset button for jefe/admin
+  authFetch('/api/me').then(r=>r.json()).then(d=>{
+    const roles = d.roles || [d.role];
+    if (roles.includes('jefe') || roles.includes('admin')) {
+      document.getElementById('btnReset').style.display = 'flex';
+    }
+  }).catch(()=>{});
+  loadData();
+}
+
+function resetSemanal() {
+  if (!confirm('¿Iniciar nueva semana? Esto borrará todas las exhibiciones actuales.')) return;
+  authFetch('/api/exhibiciones/reset', { method:'POST' })
+    .then(r=>r.json()).then(d=>{
+      if(d.ok) { loadData(); showToast('✓ Lista reiniciada para nueva semana'); }
+    }).catch(()=>showToast('Error de conexión'));
+}
+
+function getWeekKey() {
+  const d = new Date();
+  const utc = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const day = utc.getUTCDay() || 7;
+  utc.setUTCDate(utc.getUTCDate() + 4 - day);
+  const yearStart = new Date(Date.UTC(utc.getUTCFullYear(), 0, 1));
+  const week = Math.ceil((((utc - yearStart) / 86400000) + 1) / 7);
+  return utc.getUTCFullYear() + '-S' + String(week).padStart(2, '0');
+}
+
+function loadData() {
+  authFetch('/api/exhibiciones').then(r => r.json()).then(list => {
+    data = list;
+    render();
+  }).catch(() => showToast('Error al cargar'));
+}
+
+function setFiltro(f, btn) {
+  filtro = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function render() {
+  const total    = data.length;
+  const completas = data.filter(e => e.completada).length;
+  const problemas = total - completas;
+
+  // Stats
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-n">${total}</div>
+      <div class="stat-l">Total</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-n" style="color:#16A34A">${completas}</div>
+      <div class="stat-l">Completas</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-n" style="color:${problemas?'#E11D2C':'#505050'}">${problemas}</div>
+      <div class="stat-l">Con problema</div>
+    </div>`;
+
+  // Sort: bodega al final
+  let lista = [...data].sort((a,b) => {
+    if (a.cajaEstado==='bodega' && b.cajaEstado!=='bodega') return 1;
+    if (a.cajaEstado!=='bodega' && b.cajaEstado==='bodega') return -1;
+    return 0;
+  });
+
+  if (filtro === 'completas')   lista = lista.filter(e => e.completada);
+  if (filtro === 'incompletas') lista = lista.filter(e => !e.completada);
+  if (filtro === 'bodega')      lista = lista.filter(e => e.cajaEstado === 'bodega');
+
+  if (!lista.length) {
+    document.getElementById('exhibList').innerHTML = `
+      <div class="empty">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+        <div class="empty-title">Sin registros</div>
+        <div class="empty-sub">Agrega exhibiciones con el botón de arriba</div>
+      </div>`;
+    return;
+  }
+
+  // Separate bodega from rest for section headers
+  const sala   = lista.filter(e => e.cajaEstado !== 'bodega');
+  const bodega = lista.filter(e => e.cajaEstado === 'bodega');
+
+  let html = '';
+  if (sala.length && bodega.length && filtro === 'todas') {
+    html += sala.map(e => cardHTML(e)).join('');
+    html += `<div class="section-sep">Revisar al final — caja en bodega (${bodega.length})</div>`;
+    html += bodega.map(e => cardHTML(e)).join('');
+  } else {
+    html = lista.map(e => cardHTML(e)).join('');
+  }
+
+  document.getElementById('exhibList').innerHTML = html;
+}
+
+function cardHTML(e) {
+  const cardClass = e.cajaEstado==='no_hay' ? 'sin-caja' : e.completada ? 'completa' : 'incompleta';
+  const badge = e.completada
+    ? '<span class="badge badge-ok">Completa</span>'
+    : '<span class="badge badge-warn">Incompleta</span>';
+
+  return `<div class="exhib-card ${cardClass}">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px">
+      <div>
+        <div class="exhib-sc">${e.styleColor}</div>
+        <div class="exhib-talla">T. ${e.talla}</div>
+      </div>
+      <div class="card-actions">
+        ${badge}
+        <button class="btn-edit" onclick="editar('${e.id}')">Editar</button>
+        <button class="btn-del" onclick="eliminar('${e.id}')" title="Eliminar">×</button>
+      </div>
+    </div>
+    <div class="info-grid">
+      <div class="info-box">
+        <div class="info-label">Caja</div>
+        <div class="info-val" style="color:${CAJA_C[e.cajaEstado]||'#707070'}">${CAJA[e.cajaEstado]||'—'}</div>
+      </div>
+      <div class="info-box">
+        <div class="info-label">Pies</div>
+        <div class="info-val" style="color:${PIE_C[e.pieEstado]||'#707070'}">${PIE[e.pieEstado]||'—'}</div>
+      </div>
+      <div class="info-box full">
+        <div class="info-label">Ubicación</div>
+        <div class="info-val" style="color:#a0a0a0">${UBI[e.pieUbicacion]||'—'}</div>
+      </div>
+      ${e.nota ? `<div class="info-box full"><div class="info-label">Nota</div><div style="font-size:13px;font-family:'Barlow',sans-serif;color:#909090">${e.nota}</div></div>` : ''}
+      ${e.cajaEstado==='bodega' ? `<div class="info-bodega-badge full">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span style="font-size:11px;font-weight:700;font-family:'Barlow Condensed',sans-serif;color:#60a5fa;letter-spacing:.04em">REVISAR AL FINAL — caja en bodega</span>
+      </div>` : ''}
+    </div>
+  </div>`;
+}
+
+// ── Modal ─────────────────────────────────────────────────────
+function abrirModal() {
+  document.getElementById('editId').value = '';
+  document.getElementById('modalTitle').textContent = 'Nueva Exhibición';
+  document.getElementById('fSC').value = '';
+  document.getElementById('fTalla').value = '';
+  document.getElementById('fNota').value = '';
+  document.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('modal').style.display = 'flex';
+  setTimeout(() => document.getElementById('fSC').focus(), 150);
+}
+
+function editar(id) {
+  const e = data.find(x => x.id === id);
+  if (!e) return;
+  document.getElementById('editId').value = id;
+  document.getElementById('modalTitle').textContent = 'Editar Exhibición';
+  document.getElementById('fSC').value = e.styleColor;
+  document.getElementById('fTalla').value = e.talla;
+  document.getElementById('fNota').value = e.nota || '';
+  document.querySelectorAll('.opt-btn').forEach(b => {
+    b.classList.toggle('selected',
+      (b.dataset.group==='caja' && b.dataset.val===e.cajaEstado) ||
+      (b.dataset.group==='pie'  && b.dataset.val===e.pieEstado)  ||
+      (b.dataset.group==='ubi'  && b.dataset.val===e.pieUbicacion));
+  });
+  document.getElementById('modal').style.display = 'flex';
+}
+
+function cerrarModal() {
+  document.getElementById('modal').style.display = 'none';
+}
+
+function selOpt(btn) {
+  document.querySelectorAll('.opt-btn[data-group="'+btn.dataset.group+'"]').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function guardar() {
+  const sc   = document.getElementById('fSC').value.trim().toUpperCase();
+  const tal  = document.getElementById('fTalla').value.trim();
+  if (!sc || !tal) { showToast('Completa Style Color y Talla'); return; }
+  const caja = document.querySelector('.opt-btn[data-group="caja"].selected')?.dataset.val;
+  const pie  = document.querySelector('.opt-btn[data-group="pie"].selected')?.dataset.val;
+  const ubi  = document.querySelector('.opt-btn[data-group="ubi"].selected')?.dataset.val;
+  if (!caja || !pie || !ubi) { showToast('Selecciona todas las opciones'); return; }
+  const nota = document.getElementById('fNota').value.trim();
+  const id   = document.getElementById('editId').value;
+
+  authFetch(id ? '/api/exhibiciones/'+id : '/api/exhibiciones', {
+    method: id ? 'PATCH' : 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ styleColor:sc, talla:tal, cajaEstado:caja, pieEstado:pie, pieUbicacion:ubi, nota })
+  }).then(r => r.json()).then(d => {
+    if (d.ok) { cerrarModal(); loadData(); showToast(id ? '✓ Actualizado' : '✓ Exhibición registrada'); }
+    else showToast('Error: '+(d.error||'inténtalo de nuevo'));
+  }).catch(() => showToast('Error de conexión'));
+}
+
+function eliminar(id) {
+  if (!confirm('¿Eliminar este registro?')) return;
+  authFetch('/api/exhibiciones/'+id, { method:'DELETE' })
+    .then(r => r.json()).then(d => { if(d.ok) { loadData(); showToast('Eliminado'); } });
+}
+
+// ── Imprimir ──────────────────────────────────────────────────
+function imprimirExhib() {
+  if (!data.length) { showToast('Sin datos para imprimir'); return; }
+  const sorted = [...data].sort((a,b) => {
+    if (a.cajaEstado==='bodega' && b.cajaEstado!=='bodega') return 1;
+    if (a.cajaEstado!=='bodega' && b.cajaEstado==='bodega') return -1;
+    return 0;
+  });
+  const salaList   = sorted.filter(e => e.cajaEstado !== 'bodega');
+  const bodegaList = sorted.filter(e => e.cajaEstado === 'bodega');
+  const sem  = sorted[0]?.semana || '';
+  const total = sorted.length;
+  const problemas = sorted.filter(e => !e.completada).length;
+
+  function rows(list, section) {
+    let html = '';
+    if (section) html += `<tr><td colspan="6" style="background:#f0f0f0;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.08em;padding:6px 8px;border-bottom:1px solid #ccc">${section}</td></tr>`;
+    html += list.map(e => `<tr>
+      <td style="font-weight:700;font-size:13px">${e.styleColor}</td>
+      <td style="text-align:center">${e.talla}</td>
+      <td style="color:${e.cajaEstado==='no_hay'?'#c00':e.cajaEstado==='bodega'?'#00c':'#060'}">${CAJA[e.cajaEstado]||'—'}</td>
+      <td style="color:${e.pieEstado==='completo'?'#060':'#c00'}">${PIE[e.pieEstado]||'—'}</td>
+      <td style="color:#666">${UBI[e.pieUbicacion]||'—'}</td>
+      <td style="font-size:11px;color:#888">${e.nota||''}</td>
+    </tr>`).join('');
+    return html;
+  }
+
+  const w = window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Exhibiciones ${sem}</title>
+  <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:11px;padding:20px 24px;color:#111}
+  .hdr{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #E11D2C;padding-bottom:10px;margin-bottom:8px}
+  .brand{font-size:20px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}.brand span{color:#E11D2C}
+  .meta{font-size:10px;color:#888;text-align:right;line-height:1.6}
+  .summary{display:flex;gap:20px;background:#f5f5f5;padding:8px 12px;border-left:4px solid #E11D2C;margin-bottom:14px}
+  .s-item{display:flex;flex-direction:column}.s-lbl{font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:#aaa}.s-val{font-size:18px;font-weight:900}
+  table{width:100%;border-collapse:collapse}th{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#aaa;border-bottom:1.5px solid #111;padding:4px 8px;text-align:left}
+  td{padding:6px 8px;border-bottom:1px solid #eee;vertical-align:middle}
+  .footer{margin-top:14px;padding-top:8px;border-top:1px solid #eee;display:flex;justify-content:space-between;font-size:8px;color:#aaa;text-transform:uppercase;letter-spacing:.06em}
+  @media print{@page{margin:1.2cm}body{padding:0}}</style></head><body>
+  <div class="hdr"><div><div class="brand">Nike <span>Factory</span></div><div style="font-size:10px;color:#E11D2C;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-top:2px">Revisión de Exhibiciones</div></div>
+  <div class="meta">Semana ${sem}<br>${new Date().toLocaleDateString('es-CL',{weekday:'long',day:'2-digit',month:'long'})}<br>Nike Factory Concepción</div></div>
+  <div class="summary">
+    <div class="s-item"><div class="s-lbl">Total</div><div class="s-val">${total}</div></div>
+    <div class="s-item"><div class="s-lbl">Con problema</div><div class="s-val" style="color:${problemas?'#c00':'#060'}">${problemas}</div></div>
+    <div class="s-item"><div class="s-lbl">En bodega</div><div class="s-val" style="color:#00c">${bodegaList.length}</div></div>
+  </div>
+  <table><thead><tr><th>Style Color</th><th>Talla</th><th>Caja</th><th>Pies</th><th>Ubicación</th><th>Notas</th></tr></thead>
+  <tbody>${rows(salaList, salaList.length&&bodegaList.length?'Revisar primero — caja en sala':'')}${rows(bodegaList,bodegaList.length?'Revisar al final — caja en bodega':'')}</tbody></table>
+  <div class="footer"><span>Nike Factory Concepción</span><span>Generado ${new Date().toLocaleString('es-CL')}</span></div>
+  <script>window.onload=()=>window.print()<\/script></body></html>`);
+  w.document.close();
+}
+
+function nuevaRevision() {
+  if (!data.length) { showToast('La lista ya está vacía'); return; }
+  if (!confirm('¿Iniciar una nueva revisión semanal?\nEsto borrará todas las exhibiciones actuales.')) return;
+  authFetch('/api/exhibiciones/reset', { method: 'POST' })
+    .then(r => r.json())
+    .then(d => {
+      if (d.ok) { loadData(); showToast('✓ Nueva revisión iniciada'); }
+    }).catch(() => showToast('Error de conexión'));
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.opacity = '1';
+  clearTimeout(t._t); t._t = setTimeout(() => t.style.opacity = '0', 3000);
+}
+</script>
+</body>
+</html>

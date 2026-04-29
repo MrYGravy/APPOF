@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Nike · Jefatura</title>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/auth.js"></script>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#E11D2C">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="/img/nike-icon-180.png">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --red:#E11D2C; --orange:#FF6B00; --green:#16A34A; --blue:#2563EB;
+  --bg:#111111; --card:#1e1e1e; --card2:#2a2a2a;
+  --border:#383838; --border2:#444;
+  --white:#fff; --muted:#a0a0a0; --text:#f0f0f0; --text2:#c0c0c0;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--white);font-family:'Barlow',sans-serif;min-height:100vh}
+.topbar{background:#000;border-bottom:3px solid var(--red);padding:0 16px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.swoosh{font-size:22px}
+.topbar-title{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+.topbar-title span{color:var(--red)}
+.topbar-sub{font-size:10px;color:#909090;text-transform:uppercase;letter-spacing:.1em;margin-top:1px}
+.badge-count{background:var(--red);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:900;padding:2px 7px;border-radius:2px;min-width:20px;text-align:center}
+.logout-btn{background:none;border:1px solid #3a3a3a;color:#666;padding:6px 12px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:2px}
+.logout-btn:hover{color:#fff;border-color:#808080}
+
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:#000;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{background:none;border:none;border-bottom:2px solid transparent;color:#a0a0a0;padding:12px 18px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:color .15s}
+.tab:hover{color:var(--white)}
+.tab.active{color:var(--white);border-bottom-color:var(--red)}
+
+.main{padding:16px;max-width:960px;margin:0 auto}
+
+/* Cards */
+.section{background:var(--card);border:1px solid var(--border);border-radius:2px;padding:18px;margin-bottom:14px}
+.section-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#909090;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.empty{text-align:center;padding:40px 20px;color:#707070}
+.empty-icon{font-size:32px;margin-bottom:8px}
+.empty-title{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+
+/* BIN item */
+.bin-item{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid #252525}
+.bin-item:last-child{border-bottom:none}
+.bin-sc{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;color:var(--white)}
+.bin-desc{font-size:11px;color:#a0a0a0;margin-top:2px}
+.bin-badge{display:inline-block;background:#1e3a5f;color:#60a5fa;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;padding:2px 10px;letter-spacing:.04em}
+.bin-meta{font-size:10px;color:#808080;margin-top:3px}
+.btn{border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:5px 12px;border-radius:2px;transition:opacity .15s}
+.btn:hover{opacity:.85}
+.btn-resolve{background:#14532d;color:#4ade80}
+.btn-delete{background:#1a0000;color:var(--red)}
+.btn-approve{background:#14532d;color:#4ade80}
+.btn-reject{background:#1a0000;color:var(--red)}
+
+/* Pie item */
+.pie-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #252525;flex-wrap:wrap}
+.pie-item:last-child{border-bottom:none}
+.pie-sc{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;color:var(--white)}
+.pie-meta{font-size:10px;color:#808080;margin-top:2px}
+
+/* Bultos */
+.bulto-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--card2);border:1px solid var(--border2);border-radius:2px;margin-bottom:6px}
+.bulto-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;color:var(--white)}
+
+/* Stats bar */
+.stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:2px;padding:12px 16px;flex:1;min-width:120px}
+.stat-num{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;color:var(--white)}
+.stat-num.red{color:var(--red)}
+.stat-num.orange{color:var(--orange)}
+.stat-num.green{color:var(--green)}
+.stat-lbl{font-size:10px;color:#909090;text-transform:uppercase;letter-spacing:.1em;margin-top:2px}
+
+/* Input */
+.inp{width:100%;padding:9px 12px;background:#1a1a1a;border:1.5px solid var(--border2);border-radius:2px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--white);letter-spacing:.04em}
+.inp:focus{outline:none;border-color:#808080}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;border:1px solid #3a3a3a;border-left:3px solid var(--red);color:var(--white);padding:10px 20px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.06em;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s;z-index:9999;border-radius:2px;max-width:90vw;overflow:hidden;text-overflow:ellipsis}
+.toast.show{opacity:1}
+
+/* Panel */
+.panel{display:none}
+.panel.active{display:block}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="swoosh">✔</span>
+    <div>
+      <div class="topbar-title">Nike <span>Jefatura</span></div>
+      <div class="topbar-sub">Panel de Gestión</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <button class="logout-btn" onclick="window.location.href='/index.html'">🛍 Sala</button>
+    <button class="logout-btn" onclick="window.location.href='/bodega.html'">📦 Bodega</button>
+    <button class="logout-btn" onclick="logout()" style="color:#f87171;border-color:#3a1010">Salir</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" id="tabResumen" onclick="switchTab('resumen')">📊 Resumen</button>
+  <button class="tab" id="tabBins" onclick="switchTab('bins')">⚠ BINs Vacíos <span class="badge-count" id="badgeBins">0</span></button>
+  <button class="tab" id="tabPies" onclick="switchTab('pies')">👟 Pies Perdidos <span class="badge-count" id="badgePies">0</span></button>
+  <button class="tab" id="tabBultos" onclick="switchTab('bultos')">📦 Bultos</button>
+  <button class="tab" id="tabAcceso" onclick="switchTab('acceso')">🔒 Acceso</button>
+  <button class="tab" id="tabExhib" onclick="switchTab('exhibiciones')">👟 Exhibiciones</button>
+</div>
+
+<div class="main">
+
+  <!-- RESUMEN -->
+  <div class="panel active" id="panelResumen">
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-num red" id="statBins">—</div>
+        <div class="stat-lbl">BINs vacíos pendientes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num orange" id="statPies">—</div>
+        <div class="stat-lbl">Pies por aprobar</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num green" id="statBultos">—</div>
+        <div class="stat-lbl">Bultos configurados</div>
+      </div>
+    </div>
+
+    <!-- Bins pendientes preview -->
+    <div class="section" id="resumenBins">
+      <div class="section-title">⚠ BINs Vacíos Pendientes <a onclick="switchTab('bins')" style="color:#909090;font-size:10px;cursor:pointer">Ver todos →</a></div>
+      <div id="resumenBinsContent"><div class="empty"><div class="empty-icon">✅</div><div class="empty-title">Sin reportes</div></div></div>
+    </div>
+
+    <!-- Pies pendientes preview -->
+    <div class="section" id="resumenPies">
+      <div class="section-title">👟 Pies Perdidos Pendientes <a onclick="switchTab('pies')" style="color:#909090;font-size:10px;cursor:pointer">Ver todos →</a></div>
+      <div id="resumenPiesContent"><div class="empty"><div class="empty-icon">✅</div><div class="empty-title">Sin pendientes</div></div></div>
+    </div>
+
+
+  </div>
+
+  <!-- BINS VACÍOS -->
+  <div class="panel" id="panelBins">
+    <div class="section">
+      <div class="section-title">BINs Vacíos Reportados por Bodega</div>
+      <div id="binsContent"><div class="empty"><div class="empty-icon">✅</div><div class="empty-title">Sin reportes pendientes</div></div></div>
+    </div>
+  </div>
+
+  <!-- PIES PERDIDOS -->
+  <div class="panel" id="panelPies">
+    <div class="section">
+      <div class="section-title">
+        Pies Pendientes de Aprobación
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="piesFiltroJef" onchange="renderPies()" style="background:#1a1a1a;border:1px solid #3a3a3a;color:#aaa;padding:4px 8px;font-size:11px;border-radius:2px">
+            <option value="pendiente">Pendientes</option>
+            <option value="confirmado">Confirmados</option>
+            <option value="todos">Todos</option>
+          </select>
+          <button onclick="descargarPiesExcel()" style="background:#14532d;border:none;color:#4ade80;padding:4px 12px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:2px">⬇ Excel</button>
+        </div>
+      </div>
+      <div id="piesContent"><div class="empty"><div class="empty-icon">✅</div><div class="empty-title">Sin pendientes</div></div></div>
+    </div>
+  </div>
+
+
+  <!-- ACCESO -->
+  <div class="panel" id="panelAcceso">
+    <div class="section">
+      <div class="section-title">Acceso de Trabajadores</div>
+
+      <!-- Estado + toggle -->
+      <div id="accessStatusCard" style="background:#1e1e1e;border:1px solid #333;border-radius:12px;padding:20px 22px;margin-bottom:16px">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#505050;margin-bottom:10px">Estado actual</div>
+        <div id="accessStatusText" style="font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:900;color:#fff;margin-bottom:6px">Cargando...</div>
+        <div id="accessHoursText" style="font-size:12px;color:#505050;margin-bottom:18px"></div>
+        <button id="btnToggleLock" onclick="toggleManualLock()" style="width:100%;padding:14px;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;border:none;border-radius:10px;cursor:pointer;transition:all .2s">
+          Cargando...
+        </button>
+      </div>
+
+      <!-- Horario fijo: 10AM-10PM, mostrado como info -->
+      <div style="background:#141414;border:1px solid #252525;border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:12px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#505050" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <div style="font-size:12px;color:#505050;line-height:1.5">
+          Acceso automático <strong style="color:#707070">9:30 AM – 8:30 PM</strong> todos los días.<br>
+          Sala y bodega no pueden entrar fuera de ese horario.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- EXHIBICIONES -->
+  <div class="panel" id="panelExhibiciones">
+    <div class="section">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+        <div class="section-title">Exhibiciones</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <select id="exhibSemanaJef" onchange="loadExhibJef()" style="background:#1e1e1e;border:1px solid #333;color:#c0c0c0;padding:7px 12px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;border-radius:6px">
+            <option>Esta semana</option>
+          </select>
+          <button onclick="imprimirExhib()" style="background:#1e1e1e;border:1px solid #333;color:#c0c0c0;padding:7px 14px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:6px">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            Imprimir
+          </button>
+        </div>
+      </div>
+      <div id="exhibStatsJef" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px"></div>
+      <div id="exhibListJef"></div>
+    </div>
+  </div>
+
+  <!-- BULTOS -->
+  <div class="panel" id="panelBultos">
+    <div class="section">
+      <div class="section-title">Gestión de Bultos</div>
+      <div id="bultosContent"></div>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <input id="nuevoBultoJef" type="text" class="inp" placeholder="Ej: Bulto 1 — Pie Izquierdo" maxlength="60" style="flex:1">
+        <button onclick="agregarBultoJef()" style="background:var(--green);color:#000;border:none;padding:9px 18px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:2px">+ Agregar</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Modal editar pie -->
+<div id="editPieModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)">
+  <div style="background:#1e1e1e;border:1px solid #333;border-radius:14px;padding:28px 24px;width:100%;max-width:420px;box-shadow:0 24px 64px rgba(0,0,0,.7)">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:#fff;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between">
+      Editar Pie Perdido
+      <button onclick="cerrarEditPie()" style="background:none;border:none;color:#606060;cursor:pointer;font-size:20px;line-height:1" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#606060'">✕</button>
+    </div>
+    <input type="hidden" id="editPieId">
+    <div style="display:grid;gap:14px">
+      <div>
+        <label style="display:block;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#606060;margin-bottom:6px">Style Color</label>
+        <input id="editPieSC" type="text" style="width:100%;background:#2a2a2a;border:1px solid #404040;border-radius:8px;padding:10px 14px;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:#fff;letter-spacing:.04em;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <label style="display:block;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#606060;margin-bottom:6px">Talla</label>
+          <input id="editPieTalla" type="text" style="width:100%;background:#2a2a2a;border:1px solid #404040;border-radius:8px;padding:10px 14px;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:#fff">
+        </div>
+        <div>
+          <label style="display:block;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#606060;margin-bottom:6px">Lado</label>
+          <select id="editPieLado" style="width:100%;background:#2a2a2a;border:1px solid #404040;border-radius:8px;padding:10px 14px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:#fff">
+            <option value="izquierdo">Izquierdo</option>
+            <option value="derecho">Derecho</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label style="display:block;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#606060;margin-bottom:6px">Nota (opcional)</label>
+        <input id="editPieNota" type="text" style="width:100%;background:#2a2a2a;border:1px solid #404040;border-radius:8px;padding:10px 14px;font-family:'Barlow',sans-serif;font-size:14px;color:#fff" placeholder="Sin nota">
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:22px">
+      <button onclick="guardarEditPie()" style="flex:1;background:#E11D2C;color:#fff;border:none;padding:12px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:8px;transition:background .15s" onmouseover="this.style.background='#c41020'" onmouseout="this.style.background='#E11D2C'">Guardar Cambios</button>
+      <button onclick="cerrarEditPie()" style="background:#2a2a2a;color:#a0a0a0;border:1px solid #404040;padding:12px 20px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:8px">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+if (!requireRole('jefe')) {}
+
+const socket = io({ auth: { token: getToken() } });
+
+let data = { binsVacios: [], piesPendientes: [], bultos: [] };
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function logout() {
+  localStorage.clear();
+  window.location.href = '/login.html';
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1))?.classList.add('active');
+  document.getElementById('panel' + tab.charAt(0).toUpperCase() + tab.slice(1))?.classList.add('active');
+}
+
+function load() {
+  authFetch('/api/jefatura/resumen').then(r => r.json()).then(d => {
+    checkAndNotify(d);
+    data = d;
+    updateBadges();
+    renderResumen();
+    renderBins();
+    renderPies();
+    renderBultos();
+  }).catch(() => showToast('Error al cargar datos'));
+}
+
+
+function updateBadges() {
+  const bins = data.binsVacios.filter(b => b.estado === 'pendiente').length;
+  const pies = data.piesPendientes.filter(p => p.estado === 'pendiente').length;
+  document.getElementById('badgeBins').textContent = bins;
+  document.getElementById('badgePies').textContent = pies;
+  document.getElementById('statBins').textContent = bins;
+  document.getElementById('statPies').textContent = pies;
+  document.getElementById('statBultos').textContent = data.bultos.length;
+  // Red badges if there are pending items
+  document.getElementById('badgeBins').style.background = bins > 0 ? 'var(--red)' : '#333';
+  document.getElementById('badgePies').style.background = pies > 0 ? 'var(--orange)' : '#333';
+}
+
+function renderResumen() {
+  const bins = data.binsVacios.filter(b => b.estado === 'pendiente').slice(0, 3);
+  const pies = data.piesPendientes.filter(p => p.estado === 'pendiente').slice(0, 3);
+
+  document.getElementById('resumenBinsContent').innerHTML = bins.length
+    ? bins.map(b => binItemHTML(b, true)).join('')
+    : '<div class="empty"><div class="empty-icon">✅</div><div class="empty-title">Sin reportes</div></div>';
+
+  document.getElementById('resumenPiesContent').innerHTML = pies.length
+    ? pies.map(p => pieItemHTML(p)).join('')
+    : '<div class="empty"><div class="empty-icon">✅</div><div class="empty-title">Sin pendientes</div></div>';
+}
+
+function renderBins() {
+  const el = document.getElementById('binsContent');
+  const pending = data.binsVacios.filter(b => b.estado === 'pendiente');
+  el.innerHTML = pending.length
+    ? pending.map(b => binItemHTML(b, false)).join('')
+    : '<div class="empty"><div class="empty-icon">✅</div><div class="empty-title">Sin reportes pendientes</div><div style="font-size:12px;color:#707070;margin-top:4px">Bodega reporta desde Buscar BIN cuando queda un espacio vacío</div></div>';
+}
+
+function binItemHTML(b, compact) {
+  if (b.tipo === 'nota_listo') {
+    const fecha = new Date(b.createdAt).toLocaleString('es-CL', {timeZone:'America/Santiago', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
+    return `<div class="bin-item">
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;background:#1a1a00;color:#FCD34D;padding:2px 8px">NOTA AL COMPLETAR</span>
+        </div>
+        <div style="font-size:13px;color:#fff;margin-bottom:3px">${b.nota}</div>
+        <div class="bin-meta">${b.reportedBy} · ${fecha}</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <button class="btn btn-resolve" onclick="resolverBin('${b.id}')">✓ Visto</button>
+        <button class="btn btn-delete" onclick="eliminarBin('${b.id}')">🗑</button>
+      </div>
+    </div>`;
+  }
+
+  const fecha = new Date(b.createdAt).toLocaleString('es-CL', {timeZone:'America/Santiago', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
+  return `<div class="bin-item">
+    <div style="flex:1;min-width:0">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+        <div class="bin-sc">${b.styleColor}</div>
+        <span class="bin-badge">BIN ${b.bin}</span>
+      </div>
+      ${b.desc ? `<div class="bin-desc">${b.desc}</div>` : ''}
+      <div class="bin-meta">${b.reportedBy} · ${fecha}${b.nota ? ' · ' + b.nota : ''}</div>
+    </div>
+    ${!compact ? `<div style="display:flex;gap:6px;flex-shrink:0">
+      <button class="btn btn-resolve" onclick="resolverBin('${b.id}')">✓ Resuelto</button>
+      <button class="btn btn-delete" onclick="eliminarBin('${b.id}')">🗑</button>
+    </div>` : `<button class="btn btn-resolve" onclick="resolverBin('${b.id}')">✓ Resuelto</button>`}
+  </div>`;
+}
+
+function renderPies() {
+  const el = document.getElementById('piesContent');
+  const filtro = document.getElementById('piesFiltroJef')?.value || 'pendiente';
+  let lista = data.piesPendientes;
+  if (filtro !== 'todos') lista = lista.filter(p => p.estado === filtro);
+
+  if (!lista.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">✅</div><div class="empty-title">Sin ${filtro === 'todos' ? 'registros' : filtro + 's'}</div></div>`;
+    return;
+  }
+
+  // Group by bulto
+  const porBulto = {};
+  lista.forEach(p => {
+    const key = p.bultoId || 'sin_bulto';
+    if (!porBulto[key]) porBulto[key] = [];
+    porBulto[key].push(p);
+  });
+  Object.values(porBulto).forEach(arr => arr.sort((a,b) => a.styleColor.localeCompare(b.styleColor)));
+
+  el.innerHTML = Object.entries(porBulto).map(([bultoId, pies]) => {
+    const bulto = data.bultos.find(b => b.id === bultoId);
+    const pendCount = pies.filter(p => p.estado === 'pendiente').length;
+    return `<div style="background:#1e1e1e;border:1px solid #3a3a3a;border-radius:2px;margin-bottom:10px;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#1e1e1e;border-bottom:1px solid #2a2a2a">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#fff">
+          📦 ${bulto ? bulto.nombre : 'Sin bulto'} <span style="color:#808080">·</span> <span style="color:#aaa;font-weight:400">${pies.length} pies</span>
+        </div>
+        ${pendCount > 0 ? `<span style="background:#78350F;color:#FCD34D;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:900;padding:1px 8px;letter-spacing:.06em">${pendCount} pendiente${pendCount>1?'s':''}</span>` : ''}
+      </div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#2a2a2a;display:grid;grid-template-columns:28px 1fr auto auto auto;gap:8px;padding:3px 10px;border-bottom:1px solid #141414">
+        <span></span><span>Style Color</span><span></span><span>Fecha</span><span></span>
+      </div>
+      ${pies.map((p,i) => pieItemHTML(p,i)).join('')}
+    </div>`;
+  }).join('');
+}
+
+function pieItemHTML(p, idx) {
+  const bulto = data.bultos.find(b => b.id === p.bultoId);
+  const izq = p.lado === 'izquierdo';
+  const fecha = new Date(p.createdAt).toLocaleDateString('es-CL',{timeZone:'America/Santiago',day:'2-digit',month:'2-digit'});
+  const estadoBadge = p.estado === 'pendiente'
+    ? `<span style="background:#78350F;color:#FCD34D;font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:900;padding:1px 7px;letter-spacing:.06em;white-space:nowrap">PENDIENTE</span>`
+    : `<span style="background:#14532d;color:#4ade80;font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:900;padding:1px 7px;letter-spacing:.06em;white-space:nowrap">CONFIRMADO</span>`;
+  const editBtn = `<button onclick="editarPie('${p.id}')" title="Editar" style="background:none;border:1px solid #333;color:#909090;cursor:pointer;font-size:11px;padding:2px 8px;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.04em" onmouseover="this.style.borderColor='#555';this.style.color='#fff'" onmouseout="this.style.borderColor='#333';this.style.color='#909090'">EDITAR</button>`;
+  const actions = p.estado === 'pendiente'
+    ? `<button class="btn btn-approve" onclick="aprobarPie('${p.id}')">✓</button>
+       <button class="btn btn-reject" onclick="rechazarPie('${p.id}')">✗</button>
+       ${editBtn}`
+    : `${editBtn}<button onclick="eliminarPieJef('${p.id}')" title="Eliminar" style="background:none;border:none;color:#707070;cursor:pointer;font-size:12px;padding:2px 6px" onmouseover="this.style.color='#E11D2C'" onmouseout="this.style.color='#666'">✕</button>`;
+  const bg = (idx||0) % 2 === 0 ? '#0d0d0d' : '#111';
+  return `<div style="display:grid;grid-template-columns:28px 1fr auto auto auto;align-items:center;gap:8px;padding:5px 10px;background:${bg};border-left:3px solid ${p.estado==='pendiente'?'#F59E0B':'transparent'}">
+    <span style="font-size:14px;text-align:center">${izq ? '👈' : '👉'}</span>
+    <div>
+      <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;color:#fff;letter-spacing:.04em">${p.styleColor}</span>
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:12px;color:#aaa;margin-left:6px">T.${p.talla}</span>
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:#666;margin-left:6px;text-transform:uppercase;letter-spacing:.04em">${p.lado}</span>
+      ${bulto ? `<span style="font-size:10px;color:#808080;margin-left:6px">· ${bulto.nombre}</span>` : ''}
+      ${p.nota ? `<span style="font-size:10px;color:#808080;margin-left:4px">· ${p.nota}</span>` : ''}
+    </div>
+    ${estadoBadge}
+    <span style="font-size:9px;color:#707070;white-space:nowrap">${fecha}</span>
+    <div style="display:flex;gap:3px">${actions}</div>
+  </div>`;
+}
+
+function renderBultos() {
+  const el = document.getElementById('bultosContent');
+  if (!data.bultos.length) {
+    el.innerHTML = '<div style="color:#707070;font-size:13px;padding:12px 0;text-align:center">Sin bultos configurados</div>';
+    return;
+  }
+  el.innerHTML = data.bultos.map(b => `
+    <div class="bulto-item">
+      <span class="bulto-name">📦 ${b.nombre}</span>
+      <button onclick="eliminarBultoJef('${b.id}')" style="background:none;border:none;color:#808080;cursor:pointer;font-size:13px;padding:4px 8px">🗑</button>
+    </div>`).join('');
+}
+
+// Download pies perdidos as Excel/CSV
+function descargarPiesExcel() {
+  const token = localStorage.getItem('nike_token') || localStorage.getItem('nike_auth_token') || '';
+  fetch('/api/pies-perdidos/download', { headers: { 'x-auth-token': token } })
+    .then(r => {
+      if (!r.ok) { showToast('Error al descargar'); return null; }
+      return r.blob();
+    })
+    .then(blob => {
+      if (!blob) return;
+      const date = new Date().toLocaleDateString('es-CL').replace(/\//g,'-');
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `PiesPerdidos_${date}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('✓ Descargando planilla...');
+    })
+    .catch(() => showToast('Error de conexión'));
+}
+
+// Actions
+function editarPie(id) {
+  const pie = data.piesPendientes.find(p => p.id === id);
+  if (!pie) return;
+  document.getElementById('editPieId').value = id;
+  document.getElementById('editPieSC').value = pie.styleColor;
+  document.getElementById('editPieTalla').value = pie.talla;
+  document.getElementById('editPieLado').value = pie.lado;
+  document.getElementById('editPieNota').value = pie.nota || '';
+  document.getElementById('editPieModal').style.display = 'flex';
+}
+function cerrarEditPie() {
+  document.getElementById('editPieModal').style.display = 'none';
+}
+function guardarEditPie() {
+  const id = document.getElementById('editPieId').value;
+  const sc = document.getElementById('editPieSC').value.trim().toUpperCase();
+  const talla = document.getElementById('editPieTalla').value.trim();
+  const lado = document.getElementById('editPieLado').value;
+  const nota = document.getElementById('editPieNota').value.trim();
+  if (!sc || !talla) { showToast('Completa Style Color y Talla'); return; }
+  authFetch('/api/pies-perdidos/' + id + '/editar', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-auth-token': getToken() },
+    body: JSON.stringify({ styleColor: sc, talla, lado, nota })
+  }).then(r => r.json()).then(d => {
+    if (d.ok) { showToast('✓ Pie actualizado'); cerrarEditPie(); load(); }
+    else showToast('Error: ' + (d.error || 'desconocido'));
+  }).catch(() => showToast('Error de conexión'));
+}
+function resolverBin(id) {
+  authFetch('/api/bins-vacios/' + id + '/resolver', { method:'POST', headers:{'x-auth-token':getToken()} })
+    .then(r => r.json()).then(d => { if(d.ok){ showToast('✓ BIN marcado como resuelto'); load(); } });
+}
+function eliminarBin(id) {
+  if (!confirm('¿Eliminar este reporte?')) return;
+  authFetch('/api/bins-vacios/' + id, { method:'DELETE', headers:{'x-auth-token':getToken()} })
+    .then(r => r.json()).then(d => { if(d.ok){ showToast('Reporte eliminado'); load(); } });
+}
+function aprobarPie(id) {
+  authFetch('/api/pies-perdidos/' + id + '/aprobar', { method:'POST', headers:{'x-auth-token':getToken()} })
+    .then(r => r.json()).then(d => { if(d.ok){ showToast('✓ Pie aprobado'); load(); } });
+}
+function rechazarPie(id) {
+  if (!confirm('¿Rechazar y eliminar este pie?')) return;
+  authFetch('/api/pies-perdidos/' + id + '/rechazar', { method:'POST', headers:{'x-auth-token':getToken()} })
+    .then(r => r.json()).then(d => { if(d.ok){ showToast('Pie rechazado'); load(); } });
+}
+function eliminarPieJef(id) {
+  if (!confirm('¿Eliminar este pie de la lista?')) return;
+  authFetch('/api/pies-perdidos/' + id, { method:'DELETE', headers:{'x-auth-token':getToken()} })
+    .then(r => r.json()).then(d => { if(d.ok){ showToast('Pie eliminado'); load(); } });
+}
+function agregarBultoJef() {
+  const nombre = document.getElementById('nuevoBultoJef').value.trim();
+  if (!nombre) return;
+  authFetch('/api/pies-perdidos/bultos', {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json', 'x-auth-token': getToken() },
+    body: JSON.stringify({ nombre })
+  }).then(r => r.json()).then(d => {
+    if (d.ok) {
+      document.getElementById('nuevoBultoJef').value = '';
+      data.bultos = d.bultos;
+      renderBultos();
+      updateBadges();
+      showToast('✓ Bulto agregado');
+    }
+  });
+}
+function eliminarBultoJef(id) {
+  if (!confirm('¿Eliminar este bulto?')) return;
+  authFetch('/api/pies-perdidos/bultos/' + id, { method:'DELETE', headers:{'x-auth-token':getToken()} })
+    .then(r => r.json()).then(d => { if(d.ok){ data.bultos = d.bultos; renderBultos(); updateBadges(); showToast('Bulto eliminado'); } });
+}
+
+// Socket real-time updates
+socket.on('bins_vacios_updated', () => load());
+socket.on('pies_updated', () => load());
+
+// Push notifications for pending approvals
+let _lastPendingCount = 0;
+
+function requestNotifPermission() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+function checkAndNotify(newData) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  const pendPies = (newData.piesPendientes || []).filter(p => p.estado === 'pendiente').length;
+  const pendBins = (newData.binsVacios || []).filter(b => b.estado === 'pendiente').length;
+  const total = pendPies + pendBins;
+  if (total > _lastPendingCount && _lastPendingCount >= 0) {
+    const diff = total - _lastPendingCount;
+    if (diff > 0) {
+      const n = new Notification('Nike Jefatura', {
+        body: diff === 1
+          ? (pendPies > 0 ? '👟 Nuevo pie perdido pendiente de aprobación' : '⚠ Nuevo BIN vacío reportado')
+          : `${diff} nuevos pendientes de aprobación`,
+        icon: '/img/nike-icon-192.png',
+        badge: '/img/nike-icon-192.png',
+        tag: 'nike-pending',
+        renotify: true
+      });
+      n.onclick = () => { window.focus(); n.close(); };
+    }
+  }
+  _lastPendingCount = total;
+}
+
+// Load on start
+requestNotifPermission();
+load();
+setInterval(load, 30000); // refresh every 30s
+
+// ── Access Control Panel ─────────────────────────────────────
+let accessData = {};
+
+function loadAccessControl() {
+  authFetch('/api/access-control').then(r=>r.json()).then(d => {
+    accessData = d;
+    renderAccessStatus();
+  }).catch(()=>showToast('Error al cargar acceso'));
+}
+
+function renderAccessStatus() {
+  const d = accessData;
+  const statusEl = document.getElementById('accessStatusText');
+  const hoursEl  = document.getElementById('accessHoursText');
+  const btn      = document.getElementById('btnToggleLock');
+  if (!statusEl) return;
+
+  if (d.manualLock) {
+    statusEl.innerHTML   = '<span style="color:#E11D2C">🔒 Bloqueado manualmente</span>';
+    hoursEl.textContent  = 'Los trabajadores no pueden entrar';
+    btn.textContent      = 'Desbloquear app';
+    btn.style.cssText    = 'width:100%;padding:14px;font-family:Barlow Condensed,sans-serif;font-size:15px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;border:none;border-radius:10px;cursor:pointer;background:#16A34A;color:#fff';
+  } else if (d.currentlyOpen) {
+    statusEl.innerHTML   = '<span style="color:#4ade80">✓ Abierto</span>';
+    hoursEl.textContent  = 'Sala y bodega pueden acceder normalmente';
+    btn.textContent      = 'Bloquear app ahora';
+    btn.style.cssText    = 'width:100%;padding:14px;font-family:Barlow Condensed,sans-serif;font-size:15px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;border:none;border-radius:10px;cursor:pointer;background:#E11D2C;color:#fff';
+  } else {
+    statusEl.innerHTML   = '<span style="color:#F59E0B">⏱ Fuera de horario</span>';
+    hoursEl.textContent  = 'Acceso bloqueado automáticamente hasta las 9:30 AM';
+    btn.textContent      = 'Abrir temporalmente';
+    btn.style.cssText    = 'width:100%;padding:14px;font-family:Barlow Condensed,sans-serif;font-size:15px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;border:none;border-radius:10px;cursor:pointer;background:#2563EB;color:#fff';
+  }
+}
+
+function toggleManualLock() {
+  const newLock = !accessData.manualLock;
+  // If currently open by schedule but not manually locked, lock it
+  // If manually locked, unlock it
+  authFetch('/api/access-control', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ manualLock: newLock })
+  }).then(r=>r.json()).then(d => {
+    accessData = d;
+    renderAccessStatus();
+    showToast(d.manualLock ? '🔒 Acceso bloqueado' : '✓ Acceso abierto');
+  }).catch(()=>showToast('Error'));
+}
+
+
+
+
+// ── Exhibiciones (jefatura) ───────────────────────────────────
+let exhibJefData = [];
+const CAJA_TXT = { sala:'En sala', bodega:'En bodega', no_hay:'No hay' };
+const PIE_TXT  = { completo:'Ambos completos', falta_izq:'Falta pie izq.', falta_der:'Falta pie der.', faltan_ambos:'Faltan ambos' };
+const UBI_TXT  = { frontal:'Exhibidor frontal', ambos_lados:'Ambos lados', trasero:'Exhibidor trasero' };
+
+function loadExhibJef() {
+  authFetch('/api/exhibiciones').then(r=>r.json()).then(data => {
+    exhibJefData = data;
+    // Load semanas
+    authFetch('/api/exhibiciones/semanas').then(r=>r.json()).then(semanas => {
+      const sel = document.getElementById('exhibSemanaJef');
+      sel.innerHTML = semanas.map(s => `<option value="${s}">${s}</option>`).join('') || '<option>Sin datos</option>';
+    }).catch(()=>{});
+    renderExhibJef();
+  }).catch(()=>showToast('Error al cargar exhibiciones'));
+}
+
+function renderExhibJef() {
+  const lista = exhibJefData;
+  const total = lista.length;
+  const completas = lista.filter(e=>e.completada).length;
+  const problemas = total - completas;
+
+  document.getElementById('exhibStatsJef').innerHTML = `
+    <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:12px 14px">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;color:#fff">${total}</div>
+      <div style="font-size:11px;color:#505050;margin-top:2px">Total</div>
+    </div>
+    <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:12px 14px">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;color:#16A34A">${completas}</div>
+      <div style="font-size:11px;color:#505050;margin-top:2px">Completas</div>
+    </div>
+    <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:12px 14px">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;color:${problemas?'#E11D2C':'#505050'}">${problemas}</div>
+      <div style="font-size:11px;color:#505050;margin-top:2px">Con problema</div>
+    </div>`;
+
+  if (!lista.length) {
+    document.getElementById('exhibListJef').innerHTML = '<div style="text-align:center;padding:24px;color:#404040;font-family:Barlow Condensed,sans-serif;font-size:14px;font-weight:700;text-transform:uppercase">Sin registros esta semana</div>';
+    return;
+  }
+  // Sort: bodega-caja last
+  lista = [...lista].sort((a,b) => {
+    if (a.cajaEstado==='bodega' && b.cajaEstado!=='bodega') return 1;
+    if (a.cajaEstado!=='bodega' && b.cajaEstado==='bodega') return -1;
+    return 0;
+  });
+
+  const CAJA_C = { sala:'#16A34A', bodega:'#2563EB', no_hay:'#E11D2C' };
+  const PIE_C  = { completo:'#16A34A', falta_izq:'#D97706', falta_der:'#D97706', faltan_ambos:'#E11D2C' };
+
+  document.getElementById('exhibListJef').innerHTML = lista.map(e => {
+    const borderColor = e.cajaEstado==='no_hay'?'#E11D2C': e.completada?'#16A34A':'#D97706';
+    return `<div style="background:#1a1a1a;border:1px solid #252525;border-left:3px solid ${borderColor};border-radius:8px;padding:12px 14px;margin-bottom:8px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start">
+      <div>
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:15px;color:#fff">${e.styleColor}</span>
+        <span style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:#606060;margin-left:8px">T. ${e.talla}</span>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+          <span style="font-size:11px;font-weight:700;font-family:'Barlow Condensed',sans-serif;color:${CAJA_C[e.cajaEstado]||'#707070'}">Caja: ${CAJA_TXT[e.cajaEstado]||'—'}</span>
+          <span style="color:#333">·</span>
+          <span style="font-size:11px;font-weight:700;font-family:'Barlow Condensed',sans-serif;color:${PIE_C[e.pieEstado]||'#707070'}">${PIE_TXT[e.pieEstado]||'—'}</span>
+          <span style="color:#333">·</span>
+          <span style="font-size:11px;color:#505050;font-family:'Barlow Condensed',sans-serif">${UBI_TXT[e.pieUbicacion]||'—'}</span>
+        </div>
+      </div>
+      <span style="font-size:10px;color:#404040">${new Date(e.creadoEn).toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit'})}</span>
+    </div>
+    ${e.cajaEstado==='bodega'?`<div style="margin-top:6px;background:#0a1530;border:1px solid #1e3a6e;border-radius:5px;padding:5px 10px;font-size:11px;font-weight:700;font-family:'Barlow Condensed',sans-serif;color:#60a5fa;letter-spacing:.04em">REVISAR AL FINAL — caja en bodega</div>`:''}
+    ${e.nota?`<div style="margin-top:6px;font-size:11px;color:#606060;font-style:italic">Nota: ${e.nota}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function imprimirExhib() {
+  if (!exhibJefData.length) { showToast('Sin datos para imprimir'); return; }
+  const w = window.open('','_blank');
+
+  // Sort: sala/no_hay first, bodega last
+  const sorted = [...exhibJefData].sort((a,b)=>{
+    if(a.cajaEstado==='bodega'&&b.cajaEstado!=='bodega') return 1;
+    if(a.cajaEstado!=='bodega'&&b.cajaEstado==='bodega') return -1;
+    return 0;
+  });
+
+  const salaList   = sorted.filter(e=>e.cajaEstado!=='bodega');
+  const bodegaList = sorted.filter(e=>e.cajaEstado==='bodega');
+
+  function buildRows(list, showSection) {
+    let html = '';
+    if (showSection && list.length) {
+      html += `<tr><td colspan="6" style="background:#f0f0f0;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.08em;padding:6px 8px;border-bottom:1px solid #ccc">${showSection}</td></tr>`;
+    }
+    html += list.map(e => `<tr class="${e.completada?'ok':''}">
+      <td style="font-weight:700;font-size:13px">${e.styleColor}</td>
+      <td style="text-align:center">${e.talla}</td>
+      <td style="color:${e.cajaEstado==='no_hay'?'#c00':e.cajaEstado==='bodega'?'#00c':'#060'}">${CAJA_TXT[e.cajaEstado]||'—'}</td>
+      <td style="color:${e.pieEstado==='completo'?'#060':'#c00'}">${PIE_TXT[e.pieEstado]||'—'}</td>
+      <td style="color:#666">${UBI_TXT[e.pieUbicacion]||'—'}</td>
+      <td style="font-size:11px;color:#888">${e.nota||''}</td>
+      <td style="text-align:center;font-size:16px">${e.completada?'✓':''}</td>
+    </tr>`).join('');
+    return html;
+  }
+
+  const sem = sorted[0]?.semana||'';
+  const total = sorted.length;
+  const problemas = sorted.filter(e=>!e.completada).length;
+
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Exhibiciones ${sem}</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Arial,sans-serif;font-size:11px;padding:20px 24px;color:#111}
+    .header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #E11D2C;padding-bottom:10px;margin-bottom:8px}
+    .brand{font-size:20px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+    .brand span{color:#E11D2C}
+    .meta{font-size:10px;color:#888;text-align:right;line-height:1.6}
+    .summary{display:flex;gap:20px;background:#f5f5f5;padding:8px 12px;border-left:4px solid #E11D2C;margin-bottom:14px}
+    .s-item{display:flex;flex-direction:column}
+    .s-lbl{font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:#aaa}
+    .s-val{font-size:18px;font-weight:900}
+    table{width:100%;border-collapse:collapse}
+    th{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#aaa;border-bottom:1.5px solid #111;padding:4px 8px;text-align:left}
+    td{padding:6px 8px;border-bottom:1px solid #eee;vertical-align:middle}
+    tr.ok td{color:#333}
+    tr:not(.ok) td:first-child{font-weight:700}
+    .footer{margin-top:14px;padding-top:8px;border-top:1px solid #eee;display:flex;justify-content:space-between;font-size:8px;color:#aaa;text-transform:uppercase;letter-spacing:.06em}
+    .check-col{width:30px;text-align:center}
+    @media print{@page{margin:1.2cm}body{padding:0}}
+  </style></head><body>
+  <div class="header">
+    <div>
+      <div class="brand">Nike <span>Factory</span></div>
+      <div style="font-size:10px;color:#E11D2C;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-top:2px">Revisión de Exhibiciones</div>
+    </div>
+    <div class="meta">
+      Semana ${sem}<br>
+      ${new Date().toLocaleDateString('es-CL',{weekday:'long',day:'2-digit',month:'long'})}<br>
+      Nike Factory Concepción
+    </div>
+  </div>
+  <div class="summary">
+    <div class="s-item"><div class="s-lbl">Total</div><div class="s-val">${total}</div></div>
+    <div class="s-item"><div class="s-lbl">Con problema</div><div class="s-val" style="color:${problemas?'#c00':'#060'}">${problemas}</div></div>
+    <div class="s-item"><div class="s-lbl">En bodega</div><div class="s-val" style="color:#00c">${bodegaList.length}</div></div>
+  </div>
+  <table>
+    <thead><tr>
+      <th>Style Color</th><th>Talla</th><th>Caja</th><th>Pies</th><th>Ubicación</th><th>Notas</th><th class="check-col">OK</th>
+    </tr></thead>
+    <tbody>
+      ${buildRows(salaList, salaList.length&&bodegaList.length ? 'Revisar primero — caja en sala' : '')}
+      ${buildRows(bodegaList, bodegaList.length ? 'Revisar al final — caja en bodega' : '')}
+    </tbody>
+  </table>
+  <div class="footer">
+    <span>Nike Factory Concepción</span>
+    <span>Generado ${new Date().toLocaleString('es-CL')}</span>
+  </div>
+  <script>window.onload=()=>window.print()<\/script>
+  </body></html>`);
+  w.document.close();
+}
+</script>
+</body>
+</html>

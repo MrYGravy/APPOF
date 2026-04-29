@@ -1,0 +1,25 @@
+{
+  "name": "Nike Reposici\u00f3n",
+  "short_name": "Nike Rep",
+  "description": "Sistema de reposici\u00f3n Nike",
+  "start_url": "/login.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/img/nike-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/img/nike-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

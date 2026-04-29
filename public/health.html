@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nike · Estado del Sistema</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;700;900&family=Barlow:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#080808;color:#fff;font-family:'Barlow',sans-serif;padding:20px;min-height:100vh}
+.header{display:flex;align-items:center;gap:12px;margin-bottom:24px;padding-bottom:14px;border-bottom:2px solid #1a1a1a}
+.brand{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;letter-spacing:.06em}
+.brand span{color:#E11D2C}
+.subtitle{font-size:12px;color:#666;text-transform:uppercase;letter-spacing:.1em}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.card{background:#111;border:1px solid #1a1a1a;border-radius:2px;padding:18px}
+.card-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#555;margin-bottom:14px}
+.stat{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #151515}
+.stat:last-child{border-bottom:none}
+.stat-label{font-size:13px;color:#888}
+.stat-value{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:#fff}
+.stat-value.green{color:#22C55E}
+.stat-value.red{color:#E11D2C}
+.stat-value.orange{color:#FF6B00}
+.stat-value.blue{color:#60a5fa}
+.status-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:8px}
+.dot-green{background:#22C55E;box-shadow:0 0 8px #22C55E}
+.dot-red{background:#E11D2C;box-shadow:0 0 8px #E11D2C}
+.dot-orange{background:#FF6B00;box-shadow:0 0 8px #FF6B00}
+.status-bar{display:flex;align-items:center;gap:10px;background:#0a0a0a;border:1px solid #1a1a1a;padding:12px 16px;margin-bottom:20px;border-radius:2px}
+.status-text{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+.refresh-btn{margin-left:auto;background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa;padding:6px 14px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:2px}
+.refresh-btn:hover{background:#222;color:#fff}
+.mem-bar{height:6px;background:#1a1a1a;border-radius:3px;margin-top:8px;overflow:hidden}
+.mem-fill{height:100%;border-radius:3px;transition:width .3s}
+.last-update{font-size:11px;color:#444;text-align:center;margin-top:20px}
+.error-box{background:#1a0000;border:1px solid #3a0000;padding:16px;border-radius:2px;margin-bottom:20px;display:none}
+.error-box.show{display:block}
+.error-title{color:#E11D2C;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;margin-bottom:6px}
+.error-msg{color:#ff8888;font-size:12px}
+.orders-list{margin-top:8px}
+.order-item{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #151515;font-size:12px}
+.order-item:last-child{border-bottom:none}
+.badge{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;padding:2px 8px;letter-spacing:.06em;text-transform:uppercase}
+.badge-pend{background:#78350F;color:#FCD34D}
+.badge-proc{background:#1e3a5f;color:#60a5fa}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="brand">NIKE <span>FACTORY</span></div>
+    <div class="subtitle">Estado del Sistema · Concepción</div>
+  </div>
+</div>
+
+<div class="error-box" id="errorBox">
+  <div class="error-title">⚠ Error al conectar</div>
+  <div class="error-msg" id="errorMsg"></div>
+</div>
+
+<div class="status-bar">
+  <span class="status-dot" id="mainDot"></span>
+  <span class="status-text" id="mainStatus">Verificando...</span>
+  <button class="refresh-btn" onclick="load()">↻ Actualizar</button>
+</div>
+
+<div class="grid">
+  <!-- Memoria -->
+  <div class="card">
+    <div class="card-title">Memoria del Servidor</div>
+    <div class="stat">
+      <span class="stat-label">Heap V8 usado</span>
+      <span class="stat-value" id="memUsed">—</span>
+    </div>
+    <div class="mem-bar"><div class="mem-fill" id="memBar" style="width:0%;background:#22C55E"></div></div>
+    <div class="stat" style="margin-top:8px">
+      <span class="stat-label">Heap total</span>
+      <span class="stat-value" id="memTotal">—</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">RAM real del proceso</span>
+      <span class="stat-value" id="memRss">—</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Uso del heap</span>
+      <span class="stat-value" id="memPct">—</span>
+    </div>
+  </div>
+
+  <!-- Stock -->
+  <div class="card">
+    <div class="card-title">Stock de Bodega</div>
+    <div class="stat">
+      <span class="stat-label">Estado</span>
+      <span class="stat-value" id="stockStatus">—</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Productos totales</span>
+      <span class="stat-value blue" id="stockTotal">—</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Con BIN asignado</span>
+      <span class="stat-value green" id="stockBin">—</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Archivo</span>
+      <span class="stat-value" id="stockFile" style="font-size:12px;color:#aaa">—</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Actualizado</span>
+      <span class="stat-value" id="stockDate" style="font-size:12px;color:#aaa">—</span>
+    </div>
+  </div>
+
+  <!-- Servidor -->
+  <div class="card">
+    <div class="card-title">Servidor</div>
+    <div class="stat">
+      <span class="stat-label">Tiempo activo</span>
+      <span class="stat-value green" id="uptime">—</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Sesiones activas</span>
+      <span class="stat-value" id="sessions">—</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Node.js</span>
+      <span class="stat-value" id="nodeVer" style="color:#aaa;font-size:13px">—</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Última consulta</span>
+      <span class="stat-value" id="lastCheck" style="color:#aaa;font-size:12px">—</span>
+    </div>
+  </div>
+
+  <!-- Pedidos activos -->
+  <div class="card">
+    <div class="card-title">Pedidos Activos</div>
+    <div class="stat">
+      <span class="stat-label">Pendientes</span>
+      <span class="stat-value orange" id="ordPend">—</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">En proceso</span>
+      <span class="stat-value blue" id="ordProc">—</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Total activos</span>
+      <span class="stat-value" id="ordTotal">—</span>
+    </div>
+  </div>
+</div>
+
+<div class="last-update" id="lastUpdate"></div>
+
+<script src="/auth.js"></script>
+<script>
+function load() {
+  authFetch('/api/health')
+    .then(r => {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(d => {
+      document.getElementById('errorBox').classList.remove('show');
+
+      // Status bar
+      // Use RSS (real process memory) not heap % for health status
+      // Heap % is always high in Node.js - that's normal behavior
+      const rssMB = parseInt(d.memory.rss);
+      let dotClass, statusText;
+      if (rssMB > 2000) {
+        dotClass = 'dot-red'; statusText = '⚠ MEMORIA ALTA — REINICIAR PRONTO';
+      } else if (rssMB > 1000) {
+        dotClass = 'dot-orange'; statusText = 'SISTEMA OK — MEMORIA ELEVADA';
+      } else {
+        dotClass = 'dot-green'; statusText = 'SISTEMA OPERATIVO';
+      }
+      const memPct = parseInt(d.memory.pct);
+      document.getElementById('mainDot').className = 'status-dot ' + dotClass;
+      document.getElementById('mainStatus').textContent = statusText;
+
+      // Memory
+      document.getElementById('memUsed').textContent = d.memory.heapUsed;
+      document.getElementById('memTotal').textContent = d.memory.heapTotal;
+      document.getElementById('memRss').textContent = d.memory.rss;
+      // Show heap % as info but use RSS for the bar
+      document.getElementById('memPct').textContent = d.memory.pct + ' (heap interno — normal en Node.js)';
+      document.getElementById('memPct').className = 'stat-value';
+      document.getElementById('memPct').style.fontSize = '11px';
+      document.getElementById('memPct').style.color = '#666';
+      // Bar shows RSS vs 4000MB limit
+      const rssPct = Math.min(100, Math.round(rssMB / 4000 * 100));
+      const bar = document.getElementById('memBar');
+      bar.style.width = rssPct + '%';
+      bar.style.background = rssPct > 50 ? '#E11D2C' : rssPct > 25 ? '#FF6B00' : '#22C55E';
+
+      // Stock
+      document.getElementById('stockStatus').textContent = d.stock.loaded ? '✓ Cargado' : '✗ Sin cargar';
+      document.getElementById('stockStatus').className = 'stat-value ' + (d.stock.loaded ? 'green' : 'red');
+      document.getElementById('stockTotal').textContent = d.stock.products.toLocaleString('es-CL');
+      document.getElementById('stockBin').textContent = d.stock.withBin.toLocaleString('es-CL');
+      document.getElementById('stockFile').textContent = d.stock.filename || '—';
+      document.getElementById('stockDate').textContent = d.stock.updatedAt
+        ? new Date(d.stock.updatedAt).toLocaleString('es-CL', {timeZone:'America/Santiago'})
+        : '—';
+
+      // Server
+      document.getElementById('uptime').textContent = d.uptime;
+      document.getElementById('sessions').textContent = d.sessions;
+      document.getElementById('nodeVer').textContent = d.node;
+      document.getElementById('lastCheck').textContent = new Date().toLocaleTimeString('es-CL');
+
+      // Orders
+      document.getElementById('ordPend').textContent = d.orders.pendiente;
+      document.getElementById('ordProc').textContent = d.orders.enProceso;
+      document.getElementById('ordTotal').textContent = d.orders.active;
+
+      document.getElementById('lastUpdate').textContent =
+        'Actualizado: ' + new Date().toLocaleString('es-CL', {timeZone:'America/Santiago'});
+    })
+    .catch(err => {
+      document.getElementById('mainDot').className = 'status-dot dot-red';
+      document.getElementById('mainStatus').textContent = '✗ SIN CONEXIÓN CON EL SERVIDOR';
+      document.getElementById('errorBox').classList.add('show');
+      document.getElementById('errorMsg').textContent = err.message;
+    });
+}
+
+// Auto-refresh every 30 seconds
+load();
+setInterval(load, 30000);
+</script>
+</body>
+</html>

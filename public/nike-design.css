@@ -1,0 +1,356 @@
+/* =====================================================
+   NIKE REPOSICIÓN — DESIGN SYSTEM v3
+   Dirección: Industrial / Athlete Operations
+   ===================================================== */
+
+/* Noise texture overlay para profundidad */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0.4;
+}
+
+/* ---- TOPBAR upgrades ---- */
+.topbar, .topbar-left + * {
+  border-bottom-width: 2px !important;
+}
+
+/* Swoosh pulse on connect */
+.swoosh-btn img {
+  transition: filter .2s, transform .2s;
+}
+.swoosh-btn:active img {
+  transform: scale(.88);
+  filter: brightness(0) saturate(100%) invert(27%) sepia(90%) saturate(4000%) hue-rotate(340deg) brightness(90%);
+}
+
+/* ---- CARDS — sharper, more depth ---- */
+.card {
+  background: #0d0d0d !important;
+  border-color: #1f1f1f !important;
+  border-radius: 0 !important;
+  position: relative;
+  overflow: hidden;
+}
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(225,29,44,.4), transparent);
+}
+
+/* ---- SIZE GRID — hover glow ---- */
+.size-item {
+  transition: border-color .12s, background .12s, transform .12s !important;
+  cursor: pointer;
+}
+.size-item:not(.no-bin):hover {
+  border-color: var(--red) !important;
+  background: rgba(225,29,44,.06) !important;
+  transform: translateY(-1px);
+}
+.size-item:not(.no-bin):active {
+  transform: translateY(0);
+  border-color: var(--orange) !important;
+}
+.bin-tag {
+  background: rgba(30,58,95,.8) !important;
+  border: 1px solid rgba(96,165,250,.2);
+  letter-spacing: .04em;
+}
+
+/* ---- BUTTONS — sharper ---- */
+.btn-red {
+  position: relative;
+  overflow: hidden;
+  letter-spacing: .12em !important;
+}
+.btn-red::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+.btn-red:active {
+  transform: scale(.97);
+}
+.btn-white:active {
+  transform: scale(.97);
+}
+
+/* ---- QTY BUTTONS — Nike feel ---- */
+.qty-btn {
+  border-radius: 0 !important;
+  font-weight: 900 !important;
+  transition: background .1s, color .1s !important;
+}
+.qty-btn:hover, .qty-btn:active {
+  background: var(--red) !important;
+  border-color: var(--red) !important;
+  color: #fff !important;
+}
+
+/* ---- SENT ORDERS — stronger left bar ---- */
+.sent-order {
+  border-radius: 0 !important;
+  border-left-width: 4px !important;
+  transition: background .15s;
+}
+.sent-order:hover {
+  background: #161616 !important;
+}
+.sent-order.pendiente {
+  background: rgba(255,107,0,.03) !important;
+}
+.sent-order.en_proceso {
+  background: rgba(59,130,246,.03) !important;
+}
+
+/* ---- HASH WALL upgrades ---- */
+.hw-box {
+  border-radius: 0 !important;
+  transition: border-color .15s, background .15s !important;
+}
+.hw-box:hover {
+  border-color: var(--orange) !important;
+  background: rgba(255,107,0,.06) !important;
+}
+.hw-big-btn {
+  border-radius: 0 !important;
+  font-weight: 900 !important;
+}
+.hw-big-btn:hover, .hw-big-btn:active {
+  background: var(--red) !important;
+  border-color: var(--red) !important;
+  color: #fff !important;
+}
+
+/* ---- STOCK BANNER ---- */
+.stock-ok {
+  background: linear-gradient(90deg, #0a1f0a, #0d2210) !important;
+  border-color: #1a3d1a !important;
+}
+.stock-none {
+  background: linear-gradient(90deg, #1f1000, #2a1500) !important;
+  border-color: #3d2000 !important;
+}
+
+/* ---- HAMBURGER MENU ---- */
+.hbg-btn {
+  border-radius: 0 !important;
+  border-color: #333 !important;
+  transition: border-color .15s, color .15s !important;
+  font-size: 17px !important;
+  letter-spacing: 2px;
+}
+.hbg-btn:hover {
+  border-color: var(--red) !important;
+  color: #fff !important;
+}
+.hbg-menu {
+  border-radius: 0 !important;
+  border-color: #222 !important;
+  border-top: 2px solid var(--red) !important;
+  animation: menuSlide .12s ease-out;
+}
+@keyframes menuSlide {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hbg-item {
+  border-radius: 0 !important;
+  letter-spacing: .08em !important;
+  position: relative;
+}
+.hbg-item:hover, .hbg-item:active {
+  background: rgba(225,29,44,.12) !important;
+  color: #fff !important;
+  padding-left: 20px !important;
+  transition: padding-left .12s, background .12s !important;
+}
+
+/* ---- SECTION LABELS — more prominent ---- */
+.section-label {
+  letter-spacing: .14em !important;
+  font-size: 11px !important;
+}
+
+/* ---- DIVIDER — red accent ---- */
+.divider {
+  border-top-color: #1a1a1a !important;
+  position: relative;
+  overflow: visible;
+}
+
+/* ---- PAGE LOAD ANIMATION ---- */
+.main > * {
+  animation: fadeUp .3s ease-out both;
+}
+.main > *:nth-child(1) { animation-delay: .05s; }
+.main > *:nth-child(2) { animation-delay: .1s; }
+.main > *:nth-child(3) { animation-delay: .15s; }
+.main > *:nth-child(4) { animation-delay: .2s; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---- CONN BTN — cleaner ---- */
+.conn-btn.online {
+  background: rgba(20,83,45,.2) !important;
+}
+
+/* ---- SCROLLBAR ---- */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: #0a0a0a; }
+::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--red); }
+
+/* ---- FILTER BUTTONS (Todos/Pendientes) ---- */
+.fb {
+  border-radius: 0 !important;
+  transition: all .12s !important;
+}
+.fb.active {
+  background: var(--white) !important;
+  color: var(--black) !important;
+  border-color: var(--white) !important;
+  font-weight: 900 !important;
+}
+.fb:hover {
+  border-color: #888 !important;
+  color: #fff !important;
+}
+
+
+/* =====================================================
+   BODEGA SPECIFIC
+   ===================================================== */
+
+/* Stat cards hover */
+.stat:hover {
+  border-bottom-color: var(--orange) !important;
+}
+
+/* Order cards */
+.oc {
+  border-radius: 0 !important;
+  transition: border-color .12s, background .12s !important;
+}
+.oc:hover {
+  border-color: #333 !important;
+  background: #131313 !important;
+}
+
+/* Status badges */
+.sp-pendiente, .badge-status-pendiente {
+  background: rgba(255,107,0,.12) !important;
+  color: var(--orange) !important;
+  border: 1px solid rgba(255,107,0,.2) !important;
+}
+.sp-en_proceso, .badge-status-en_proceso {
+  background: rgba(59,130,246,.12) !important;
+  color: #60a5fa !important;
+  border: 1px solid rgba(59,130,246,.2) !important;
+}
+.sp-listo, .badge-status-listo {
+  background: rgba(34,197,94,.12) !important;
+  color: var(--green) !important;
+  border: 1px solid rgba(34,197,94,.2) !important;
+}
+
+/* it table rows */
+.it tr:hover td {
+  background: rgba(255,255,255,.02);
+}
+
+/* Progress bar */
+.prog-fill {
+  background: linear-gradient(90deg, var(--red), var(--orange)) !important;
+}
+
+/* Tabs container bottom line */
+.tabs-wrap {
+  border-bottom: 1px solid #1a1a1a;
+}
+
+/* Excel status card top accent */
+.excel-card {
+  border-top: 2px solid var(--green) !important;
+}
+
+/* Rank podium cards */
+#rankContent > div,
+#miniRankContent > div {
+  animation: fadeUp .25s ease-out both;
+}
+
+/* BIN tags across app */
+.bin, .bin-tag, .hc-bin {
+  font-family: 'Barlow Condensed', sans-serif !important;
+  font-weight: 900 !important;
+  letter-spacing: .05em !important;
+}
+
+/* RH section top accent on first child */
+.rh-section:first-child {
+  border-top-color: var(--green) !important;
+}
+
+/* Changelog entry */
+#changelogContent > div {
+  transition: background .15s;
+}
+#changelogContent > div:hover {
+  background: #141414 !important;
+}
+
+/* =====================================================
+   ADMIN PAGE
+   ===================================================== */
+.user-card {
+  border-radius: 0 !important;
+  border-left: 3px solid transparent !important;
+  transition: border-left-color .15s, background .15s !important;
+}
+.user-card:hover {
+  border-left-color: var(--red) !important;
+  background: #111 !important;
+}
+
+/* =====================================================
+   GLOBAL POLISH
+   ===================================================== */
+
+/* Toast */
+#_toast {
+  border-radius: 0 !important;
+  font-family: 'Barlow Condensed', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  letter-spacing: .06em !important;
+  text-transform: uppercase !important;
+}
+
+/* Focus rings — Nike red */
+input:focus, select:focus, textarea:focus {
+  box-shadow: 0 0 0 1px rgba(225,29,44,.3) !important;
+}
+
+/* Checkboxes */
+input[type="checkbox"] {
+  accent-color: var(--red);
+}
+
+/* Selection highlight */
+::selection {
+  background: rgba(225,29,44,.3);
+  color: #fff;
+}
+

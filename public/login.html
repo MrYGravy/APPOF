@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Nike Rep">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="/img/nike-icon-180.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#E11D2C">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" sizes="192x192" href="/img/nike-icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/img/nike-icon-180.png">
+<meta name="apple-mobile-web-app-title" content="Nike Repo">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Nike · Acceso</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Barlow',sans-serif;background:url('/img/nike-store.png') center center/cover no-repeat fixed;min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:20px;position:relative}
+body::before{content:'';position:fixed;inset:0;background:linear-gradient(160deg,rgba(0,0,0,.75) 0%,rgba(10,0,0,.85) 50%,rgba(0,0,0,.92) 100%);z-index:0}
+body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(225,29,44,.06) 0%,transparent 60%);z-index:0;pointer-events:none}
+body>*{position:relative;z-index:1}
+.card{
+  background:rgba(0,0,0,.92);
+  border:1px solid rgba(255,255,255,.08);
+  border-top:2px solid #E11D2C;
+  border-radius:0;
+  padding:44px 40px;
+  width:100%;
+  max-width:400px;
+  box-shadow:0 32px 80px rgba(0,0,0,.9),0 0 0 1px rgba(225,29,44,.1);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  animation:cardIn .4s cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes cardIn{from{opacity:0;transform:translateY(20px) scale(.97)}to{opacity:1;transform:none}}
+.logo-img{width:100px;height:auto;display:block;margin:0 auto 32px;filter:brightness(0) invert(1);animation:logoIn .6s ease-out .1s both}
+@keyframes logoIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:none}}
+.headline{font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#fff;text-align:center;margin-bottom:4px;line-height:1}
+.sub{font-size:11px;color:rgba(255,255,255,.35);text-align:center;margin-bottom:32px;letter-spacing:.12em;text-transform:uppercase}
+.field{margin-bottom:16px}
+.field label{display:block;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:rgba(255,255,255,.4);margin-bottom:7px}
+.field input{
+  width:100%;padding:14px 16px;
+  border:1px solid rgba(255,255,255,.1);
+  border-bottom:2px solid rgba(255,255,255,.15);
+  border-radius:0;
+  background:rgba(255,255,255,.04);
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:17px;font-weight:700;letter-spacing:.04em;
+  color:#fff;transition:all .15s;-webkit-appearance:none;
+}
+.field input::placeholder{color:rgba(255,255,255,.18);font-size:14px;font-weight:400;letter-spacing:0;font-family:'Barlow',sans-serif}
+.field input:focus{outline:none;border-bottom-color:#E11D2C;background:rgba(225,29,44,.04)}
+.role-select{display:flex;gap:0;margin-bottom:24px;border:1px solid rgba(255,255,255,.1);border-radius:0;overflow:hidden}
+.role-btn{flex:1;padding:16px 8px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;border:none;background:transparent;color:rgba(255,255,255,.3);cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:6px;touch-action:manipulation}
+.role-btn span.ico{font-size:22px}
+.role-btn.active{background:rgba(225,29,44,.12);color:#fff;border-bottom:2px solid #E11D2C}
+.role-btn:first-child{border-right:1px solid rgba(255,255,255,.08)}
+.btn-login{
+  width:100%;padding:16px;
+  background:#fff;color:#000;border:none;
+  border-radius:0;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:18px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;
+  cursor:pointer;margin-top:8px;
+  transition:background .12s, transform .1s;
+  -webkit-appearance:none;touch-action:manipulation;
+  position:relative;overflow:hidden;
+}
+.btn-login::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.12) 0%,transparent 60%);pointer-events:none}
+.btn-login:hover{background:#e5e5e5}
+.btn-login:active{transform:scale(.98)}
+.btn-login:disabled{background:rgba(255,255,255,.15);cursor:not-allowed;color:rgba(0,0,0,.4)}
+.error{background:rgba(225,29,44,.08);border:1px solid rgba(225,29,44,.3);border-left:3px solid #E11D2C;border-radius:0;padding:10px 14px;font-size:13px;color:#f87171;margin-top:12px;display:none}
+.login-copy{margin-top:24px;text-align:center;font-size:9px;color:rgba(255,255,255,.15);text-transform:uppercase;letter-spacing:.16em}
+#changePwdOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:999;align-items:center;justify-content:center;padding:20px}
+#changePwdOverlay.show{display:flex}
+.cpwd-card{background:#111;border:1px solid #222;border-radius:16px;padding:36px 28px;width:100%;max-width:380px}
+.cpwd-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;text-transform:uppercase;color:#fff;margin-bottom:6px}
+.cpwd-sub{font-size:13px;color:#aaa;margin-bottom:22px;line-height:1.5}
+.cpwd-field{margin-bottom:14px}
+.cpwd-field label{display:block;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.5);margin-bottom:6px}
+.cpwd-field input{width:100%;padding:12px 14px;border:1px solid #555;border-radius:8px;background:#1a1a1a;font-size:16px;color:#fff;-webkit-appearance:none}
+.cpwd-field input:focus{outline:none;border-color:#777}
+#pwaOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:9999;align-items:flex-end;justify-content:center}
+#pwaOverlay.show{display:flex}
+.pwa-sheet{background:#111;width:100%;border-radius:18px 18px 0 0;padding:28px 24px 48px;border-top:1px solid #222}
+.pwa-step{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid #1a1a1a}
+.pwa-step:last-of-type{border-bottom:none}
+.pwa-ico{width:44px;height:44px;background:#1a1a1a;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.pwa-step p{font-size:13px;color:#ccc;margin:0;line-height:1.4}
+.pwa-step p b{color:#fff}
+.pwa-btn{width:100%;margin-top:10px;padding:14px;background:#fff;color:#000;border:none;border-radius:10px;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;touch-action:manipulation}
+</style>
+<script>if("serviceWorker"in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{});});}</script>
+
+<link rel="stylesheet" href="/nike-design.css">
+</head>
+<body>
+
+<div id="pwaOverlay">
+  <div class="pwa-sheet">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+      <img src="/img/nike-icon-180.png" style="width:52px;height:52px;border-radius:12px" alt="">
+      <div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;text-transform:uppercase;color:#fff">Instalar App Nike</div>
+        <div style="font-size:11px;color:#aaa">nike.hyleveling.net</div>
+      </div>
+    </div>
+    <div class="pwa-step"><div class="pwa-ico">⎋</div><p><b>Paso 1:</b> Toca <b>Compartir</b> (⎋) en Safari</p></div>
+    <div class="pwa-step"><div class="pwa-ico">＋</div><p><b>Paso 2:</b> Toca <b>"Añadir a pantalla de inicio"</b></p></div>
+    <div class="pwa-step"><div class="pwa-ico">✓</div><p><b>Paso 3:</b> Toca <b>"Añadir"</b></p></div>
+    <button class="pwa-btn" onclick="closePWA()">Entendido</button>
+    <button class="pwa-btn" onclick="closePWA(true)" style="background:transparent;color:#aaa;margin-top:8px">No instalar</button>
+  </div>
+</div>
+
+<div id="changePwdOverlay">
+  <div class="cpwd-card">
+    <div class="cpwd-title">🔒 Elige tu contraseña</div>
+    <div class="cpwd-sub">Es tu primer ingreso. Elige una contraseña personal de al menos 6 caracteres.</div>
+    <div class="cpwd-field"><label>Contraseña actual</label><input type="password" id="cpwdCurrent" placeholder="nike2020" autocomplete="current-password"></div>
+    <div class="cpwd-field"><label>Nueva contraseña</label><input type="password" id="cpwdNew" placeholder="Mínimo 6 caracteres" autocomplete="new-password"></div>
+    <div class="cpwd-field"><label>Confirmar</label><input type="password" id="cpwdConfirm" placeholder="Repite la contraseña" autocomplete="new-password"></div>
+    <div class="error" id="cpwdError"></div>
+    <button class="btn-login" style="margin-top:16px" onclick="submitChangePassword()">Guardar y entrar</button>
+    <button onclick="skipChangePassword()" style="width:100%;margin-top:10px;padding:10px;background:transparent;border:none;color:rgba(255,255,255,.3);font-size:13px;cursor:pointer;font-family:'Barlow',sans-serif">Cambiar después</button>
+  </div>
+</div>
+
+<div class="card">
+  <img src="/img/nike-logo.png" class="logo-img" alt="Nike">
+  <div class="headline">Reposición</div>
+  <div class="sub">Sistema interno Nike · Acceso autorizado</div>
+
+  <div class="field">
+    <label>Usuario</label>
+    <input type="text" id="username" placeholder="nombre.apellido" autocomplete="username" autocapitalize="none" spellcheck="false"
+      onkeydown="if(event.key==='Enter')document.getElementById('password').focus()">
+  </div>
+  <div class="field">
+    <label>Contraseña</label>
+    <input type="password" id="password" placeholder="••••••••" autocomplete="current-password"
+      onkeydown="if(event.key==='Enter')doLogin()">
+  </div>
+
+  <div id="roleSelectWrap" style="display:none;margin-bottom:4px">
+    <label style="display:block;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.5);margin-bottom:8px">¿A dónde vas?</label>
+    <div class="role-select">
+      <button class="role-btn active" id="roleBtnSala" onclick="selectRole('sala')" ontouchstart="">
+        <span class="ico">🛍</span>SALA
+      </button>
+      <button class="role-btn" id="roleBtnBodega" onclick="selectRole('bodega')" ontouchstart="">
+        <span class="ico">📦</span>BODEGA
+      </button>
+    </div>
+  </div>
+
+  <div class="error" id="errMsg"></div>
+  <button class="btn-login" id="btnLogin" onclick="doLogin()">Entrar</button>
+  <div class="login-copy">© 2026 ROOT.MATISR. V2.0</div>
+</div>
+
+<script>
+let _loginData = null;
+let _chosenRole = 'sala';
+
+function selectRole(role) {
+  _chosenRole = role;
+  document.getElementById('roleBtnSala').classList.toggle('active', role === 'sala');
+  document.getElementById('roleBtnBodega').classList.toggle('active', role === 'bodega');
+}
+
+async function doLogin() {
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+  const btn = document.getElementById('btnLogin');
+  const err = document.getElementById('errMsg');
+  if (!username || !password) { showError('Completa usuario y contraseña'); return; }
+  btn.disabled = true; btn.textContent = 'Entrando…'; err.style.display = 'none';
+  try {
+    const res = await fetch('/api/login', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (!data.ok) {
+      showError(data.error || 'Usuario o contraseña incorrectos');
+      btn.disabled = false; btn.textContent = 'Entrar'; return;
+    }
+    _loginData = data;
+    const hasSala = data.roles.includes('sala');
+    const hasBodega = data.roles.includes('bodega');
+    if (hasSala && hasBodega) {
+      document.getElementById('roleSelectWrap').style.display = 'block';
+      selectRole('sala');
+      btn.disabled = false; btn.textContent = 'Confirmar';
+      btn.onclick = confirmAndEnter;
+    } else {
+      _chosenRole = hasBodega ? 'bodega' : 'sala';
+      await enterApp(data);
+    }
+  } catch(e) {
+    showError('Error de conexión'); btn.disabled = false; btn.textContent = 'Entrar';
+  }
+}
+
+async function confirmAndEnter() { if (_loginData) await enterApp(_loginData); }
+
+async function enterApp(data) {
+  localStorage.setItem('nike_token', data.token);
+  localStorage.setItem('nike_role', _chosenRole);
+  localStorage.setItem('nike_username', data.username);
+  localStorage.setItem('nike_displayName', data.displayName || data.username);
+  if (data.mustChangePassword) {
+    document.getElementById('changePwdOverlay').classList.add('show');
+    return;
+  }
+  window.location.href = _chosenRole === 'bodega' ? '/bodega.html' : '/index.html';
+}
+
+async function submitChangePassword() {
+  const current = document.getElementById('cpwdCurrent').value;
+  const newPwd  = document.getElementById('cpwdNew').value;
+  const confirm = document.getElementById('cpwdConfirm').value;
+  if (!current || !newPwd || !confirm) { showCpwdError('Completa todos los campos'); return; }
+  if (newPwd !== confirm) { showCpwdError('Las contraseñas no coinciden'); return; }
+  if (newPwd.length < 6) { showCpwdError('Mínimo 6 caracteres'); return; }
+  try {
+    const res = await fetch('/api/change-password', {
+      method: 'POST', headers: {'Content-Type':'application/json','x-auth-token':localStorage.getItem('nike_token')},
+      body: JSON.stringify({ currentPassword: current, newPassword: newPwd })
+    });
+    const data = await res.json();
+    if (!data.ok) { showCpwdError(data.error || 'Error'); return; }
+    document.getElementById('changePwdOverlay').classList.remove('show');
+    window.location.href = _chosenRole === 'bodega' ? '/bodega.html' : '/index.html';
+  } catch(e) { showCpwdError('Error de conexión'); }
+}
+
+function skipChangePassword() {
+  document.getElementById('changePwdOverlay').classList.remove('show');
+  window.location.href = _chosenRole === 'bodega' ? '/bodega.html' : '/index.html';
+}
+
+function showError(msg) { const e=document.getElementById('errMsg'); e.textContent=msg; e.style.display='block'; }
+function showCpwdError(msg) { const e=document.getElementById('cpwdError'); e.textContent=msg; e.style.display='block'; }
+
+// PWA
+(function(){
+  var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+  var isStandalone=window.navigator.standalone===true;
+  if(isIOS&&!isStandalone&&!localStorage.getItem('pwa_ok')){
+    setTimeout(()=>document.getElementById('pwaOverlay').classList.add('show'),1500);
+  }
+})();
+function closePWA(skip){ document.getElementById('pwaOverlay').classList.remove('show'); if(skip)localStorage.setItem('pwa_ok','1'); }
+
+// Auto-login if token valid
+(async function(){
+  const token=localStorage.getItem('nike_token');
+  const role=localStorage.getItem('nike_role');
+  if(!token) return;
+  try {
+    const res=await fetch('/api/me',{headers:{'x-auth-token':token}});
+    const data=await res.json();
+    if(data.ok) window.location.href=role==='bodega'?'/bodega.html':'/index.html';
+  } catch(e){}
+})();
+</script>
+</body>
+</html>
